@@ -9,7 +9,7 @@ namespace Core.Entities
     {
         public string NickName { get; set; } = string.Empty;
         public DateTime DataRegistro { get; set; } = DateTime.UtcNow;
-        public bool isAdmin { get; set; } = false;
+        public bool IsAdmin { get; set; } = false;
 
         public ICollection<Inscricao> Inscricoes { get; set; } = new List<Inscricao>();
     }

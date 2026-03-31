@@ -6,6 +6,7 @@ using System.Text;
 using Core.Entities;
 using Infrastructure.Data;
 using API.Extensions;
+using API.Service;
 
 
 
@@ -25,6 +26,8 @@ builder.Services.AddIdentity<Usuario, IdentityRole>()
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 
+
+builder.Services.AddScoped<TokenService>();
 
 
 
