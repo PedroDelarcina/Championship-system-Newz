@@ -11,7 +11,7 @@ namespace Core.Entities
         public string TipoCampeonato { get; set; } = string.Empty; // ClansxClans, Solo, Duplas, Times 
         public DateTime DataInicio { get; set; }
         public DateTime DataFim { get; set; }
-        public bool isAtivo { get; set; } = true;
+        public bool IsAtivo { get; set; } = true;
         public int MaxParticipantes { get; set; }
         public string? Campeao { get; set; }
 
