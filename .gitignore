@@ -416,3 +416,12 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Ignorar arquivos de configuracao com dados sensiveis
+**/appsettings.Development.json
+**/appsettings.Production.json
+
+# Ignorar pastas padrao do .NET
+**/bin/
+**/obj/
+**/Migrations/
