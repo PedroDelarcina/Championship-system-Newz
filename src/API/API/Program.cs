@@ -1,12 +1,14 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Core.Entities;
-using Infrastructure.Data;
 using API.Extensions;
 using API.Service;
+using Core.Entities;
+using Core.Interfaces;
+using Infrastructure.Data;
+using Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 
 
@@ -26,9 +28,15 @@ builder.Services.AddIdentity<Usuario, IdentityRole>()
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 
-
+//registrar Services
 builder.Services.AddScoped<TokenService>();
 
+
+//registrar Repositories
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<ICampeonatoRepository, CampeonatoRepository>();
+builder.Services.AddScoped<ITimeRepository, TimeRepository>();
+builder.Services.AddScoped<IInscricaoRepository, InscricaoRepository>();
 
 
 builder.Services.AddControllers();
