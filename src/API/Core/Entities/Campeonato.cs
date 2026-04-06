@@ -10,6 +10,8 @@ namespace Core.Entities
         public string Nome  { get; set; } = string.Empty;
         public string TipoCampeonato { get; set; } = string.Empty; // ClansxClans, Solo, Duplas, Times 
         public DateTime DataInicio { get; set; }
+        public string DescricaoRegras { get; set; } = string.Empty;
+        public string? RegrasExtras { get; set; }
         public DateTime DataFim { get; set; }
         public bool IsAtivo { get; set; } = true;
         public int MaxParticipantes { get; set; }

@@ -16,26 +16,26 @@ namespace Infrastructure.Repositories
             
         }
 
-        public async Task<IEnumerable<Campeonato>> GetCampeonatosAtivosAsync()
+        public async Task<IEnumerable<Campeonato>> GetCampeonatosAtivosAsync(CancellationToken cancellationToken)
         {
-            return await _dbSet.Where(c => c.IsAtivo && c.DataFim > DateTime.UtcNow).OrderBy(c=> c.DataInicio).ToListAsync();
+            return await _dbSet.Where(c => c.IsAtivo && c.DataFim > DateTime.UtcNow).OrderBy(c=> c.DataInicio).ToListAsync(cancellationToken);
         }
 
-        public async Task<Campeonato?> GetCampeonatoInscricoesAsync(int id)
+        public async Task<Campeonato?> GetCampeonatoInscricoesAsync(int id, CancellationToken cancellationToken)
         {
             return await _dbSet.Include(c => c.Inscricoes)
                                .ThenInclude(i => i.Time)
                                .ThenInclude(t => t.Players)
                                .ThenInclude(pt => pt.Player)
-                               .FirstOrDefaultAsync(c => c.Id == id);
+                               .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
         }
 
-        public async Task<IEnumerable<Campeonato>> GetCampeonatosByTipoAsync(string tipo)
+        public async Task<IEnumerable<Campeonato>> GetCampeonatosByTipoAsync(string tipo, CancellationToken cancellationToken)
         {
-            return await _dbSet.Where(c => c.TipoCampeonato == tipo).OrderByDescending(c=> c.DataInicio).ToListAsync();
+            return await _dbSet.Where(c => c.TipoCampeonato == tipo).OrderByDescending(c=> c.DataInicio).ToListAsync(cancellationToken);
         }
 
-        public async Task<bool> ExisteCampeonatosAtivosAsync(DateTime dataInicio, DateTime dataFim, int? idIgnorar = null)
+        public async Task<bool> ExisteCampeonatosAtivosAsync(DateTime dataInicio, DateTime dataFim, int? idIgnorar = null, CancellationToken cancellationToken = default)
         {
            var query = _dbSet.Where(c => c.IsAtivo && 
                                         ((c.DataInicio >= dataInicio && c.DataInicio <= dataFim) ||
@@ -46,7 +46,7 @@ namespace Infrastructure.Repositories
                 query = query.Where(c => c.Id != idIgnorar.Value);
             }
 
-            return await query.AnyAsync();
+            return await query.AnyAsync(cancellationToken);
         }
 
     }
