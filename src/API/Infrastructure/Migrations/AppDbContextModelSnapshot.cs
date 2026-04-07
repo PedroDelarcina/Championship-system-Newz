@@ -39,6 +39,10 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("DataInicio")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DescricaoRegras")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsAtivo")
                         .HasColumnType("bit");
 
@@ -49,6 +53,9 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("RegrasExtras")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TipoCampeonato")
                         .IsRequired()

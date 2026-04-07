@@ -29,7 +29,7 @@ namespace API.Controllers
         }
 
 
-        [HttpPost("registro")]
+        [HttpPost("Registro")]
         [AllowAnonymous]
         public async Task<IActionResult> Registro([FromBody] RegistroDto registroDto)
         {
@@ -50,7 +50,7 @@ namespace API.Controllers
 
                 var user = new Usuario
                 {
-                    UserName = registroDto.Email,
+                    UserName = registroDto.UserName,
                     Email = registroDto.Email,
                     NickName = registroDto.Nickname,
                     DataRegistro = DateTime.UtcNow,
@@ -65,7 +65,13 @@ namespace API.Controllers
                     return BadRequest(new { message = "Erro ao criar usuário", erros });
                 }
 
-                await _userManager.AddToRoleAsync(user, "User");
+               var roleResult =  await _userManager.AddToRoleAsync(user, "User");
+
+                if (!roleResult.Succeeded)
+                {
+                    var erros = roleResult.Errors.Select(e => e.Description);
+                    return BadRequest(new { message = "Erro ao adicionar usuário à role", erros });
+                }
 
                 _logger.LogInformation($"Novo usuário registrado: {user.Email}");
 
@@ -90,9 +96,9 @@ namespace API.Controllers
         }
 
 
-        [HttpPost("login")]
+        [HttpPost("Login")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto, CancellationToken cancellationToken)
         {
             try
             {
@@ -109,7 +115,7 @@ namespace API.Controllers
                     return Unauthorized(new { message = "Senha Inválida" });
                 }
 
-                var token = _tokenService.GenerateUserToken(user);
+                var token = _tokenService.GenerateUserToken(user, cancellationToken);
 
                 _logger.LogInformation($"Usuário logado: {user.Email}");
 

@@ -18,6 +18,8 @@ namespace Core.DTOs.Campeonato
         [Required(ErrorMessage = "Descrição das regras é obrigatória")]
         public string DescricaoRegras { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Número máximo de equipes ou participantes é obrigatório")]
+        public int MaxParticipantes { get; set; }
         [Required(ErrorMessage = "Data de início é obrigatória")]
         public DateTime DataInicio { get; set; }
 

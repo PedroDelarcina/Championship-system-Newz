@@ -13,11 +13,18 @@ namespace Core.DTOs.Auth
 
         [Required(ErrorMessage = "Senha é obrigatória")]
         [MinLength(6, ErrorMessage = "Senha deve ter no mínimo 6 caracteres")]
+        [RegularExpression(@"^(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{6,}$",
+         ErrorMessage = "A senha deve ter no mínimo 6 caracteres, uma letra maiúscula e um caractere especial.")]
         public string Password { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Confirmação de senha é obrigatória")]
         [Compare("Password", ErrorMessage = "Senhas não conferem")]
         public string ConfirmPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Nome é obrigatório")]
+        [MinLength(3, ErrorMessage = "Nome deve ter no mínimo 3 caracteres")]
+        [MaxLength(100, ErrorMessage = "Nome deve ter no máximo 100 caracteres")]
+        public string UserName { get; set; } = string.Empty; 
 
         [Required(ErrorMessage = "Nickname é obrigatório")]
         [MinLength(3, ErrorMessage = "Nickname deve ter no mínimo 3 caracteres")]

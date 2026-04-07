@@ -24,7 +24,7 @@ namespace API.Service
             return Convert.FromBase64String(key);
         }
 
-        private TokenModel GenerateToken(Claim[] claim)
+        private TokenModel GenerateToken(Claim[] claim, CancellationToken cancellationToken = default)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             if (!double.TryParse(_configuration.GetValue<string>("Extra: TokenExpirationTime"),
@@ -49,7 +49,7 @@ namespace API.Service
         }
 
 
-        private Claim[] GetUserClaim(Usuario usuario)
+        private Claim[] GetUserClaim(Usuario usuario, CancellationToken cancellationToken)
         {
             return new Claim[]
             {
@@ -62,9 +62,9 @@ namespace API.Service
             };
         }
 
-        public TokenModel GenerateUserToken(Usuario usuario)
+        public TokenModel GenerateUserToken(Usuario usuario, CancellationToken cancellationToken)
         {
-           return GenerateToken(GetUserClaim(usuario));
+           return GenerateToken(GetUserClaim(usuario, cancellationToken));
         }
     }
 }
