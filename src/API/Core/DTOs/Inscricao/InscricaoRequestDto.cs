@@ -12,7 +12,7 @@ namespace Core.DTOs.Inscricao
         public int CampeonatoId { get; set; }
 
         [Required(ErrorMessage = "Dados do time são obrigatórios")]
-        public TimeRequestDto Time { get; set; } = null!;
+        public int TimeId { get; set; }
 
     }
 }

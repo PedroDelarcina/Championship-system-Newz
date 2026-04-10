@@ -13,7 +13,8 @@ namespace Core.DTOs.Time
         public string? LogoUrl { get; set; }
         public DateTime DataCriacao { get; set; }
         public List<UsuarioResponseDto> Jogadores { get; set; } = new List<UsuarioResponseDto>();
-        public UsuarioResponseDto? Lider { get; set; }
+        public string? Lider { get; set; }
+        public string? LiderId { get; set; }
         public int TotalJogadores { get; set; }
 
     }

@@ -13,7 +13,7 @@ namespace Core.DTOs.Campeonato
         public string Nome { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Tipo é obrigatório")]
-        public string TipoCampeonato { get; set; } = string.Empty; // "ClanxClan", "Solo", "Dupla", "Trios"
+        public string TipoCampeonato { get; set; } = string.Empty; // "ClanxClan", "Solo", "Dupla", "Trios", "5x5"
 
         [Required(ErrorMessage = "Descrição das regras é obrigatória")]
         public string DescricaoRegras { get; set; } = string.Empty;

@@ -151,7 +151,7 @@ namespace API.Controllers
         /// </summary>
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AtualizaCampeonato([FromBody] CampeonatoRequestDto campeonatoRequestDto, int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> AtualizaCampeonato(int id, [FromBody] CampeonatoRequestDto campeonatoRequestDto, CancellationToken cancellationToken)
         {
             var campeonato = await _campeonatoRepository.GetByIdAsync(id, cancellationToken);
             if (campeonato == null)

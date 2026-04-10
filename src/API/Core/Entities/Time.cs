@@ -9,6 +9,8 @@ namespace Core.Entities
         public int Id { get; set; } 
         public string Nome { get; set; } = string.Empty;
         public string? Clantag { get; set; } = string.Empty;
+        public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
+        public string? LogoUrl { get; set; } = string.Empty;
 
 
         public ICollection<Inscricao> Inscricoes { get; set; } = new List<Inscricao>();
