@@ -37,6 +37,14 @@ namespace Infrastructure.Repositories
                    .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
         }
 
+        public async Task<IEnumerable<Time>> GetAllWithPlayersAsync(CancellationToken cancellationToken)
+        {
+            return await _dbSet
+                .Include(t => t.Players)
+                    .ThenInclude(p => p.Player)  
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<IEnumerable<Time>> GetTimesByCampeonatoIdAsync(int campeonatoId, CancellationToken cancellationToken)
         {
             return await _dbSet.Where(t => t.Inscricoes.Any(i => i.CampeonatoId == campeonatoId))

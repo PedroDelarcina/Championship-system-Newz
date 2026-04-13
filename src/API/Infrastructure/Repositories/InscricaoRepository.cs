@@ -22,7 +22,9 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<Inscricao>> GetInscricoesByCampeonatoIdAsync(int campeonatoId, CancellationToken cancellationToken)
         {
-            return await _dbSet.Include(i => i.Time)
+            return await _dbSet
+                        .Include(c => c.Campeonato)
+                        .Include(i => i.Time)
                         .ThenInclude(t => t.Players)
                         .ThenInclude(jt => jt.Player)
                       .Include(i => i.Usuario)

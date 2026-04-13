@@ -66,7 +66,7 @@ namespace API.Controllers
         /// <summary>
         /// Obter inscrição por ID 
         /// </summary>
-        [HttpGet("{id}")]
+     /*   [HttpGet("{id}")]
         public async Task<IActionResult> ObterInscricoesById(int id, CancellationToken cancellation)
         {
 
@@ -117,7 +117,7 @@ namespace API.Controllers
             };
 
             return Ok(result);
-        }
+        } */
 
         /// <summary>
         /// Listar inscrições do usuário logado
@@ -219,5 +219,122 @@ namespace API.Controllers
                 return StatusCode(500, new { message = "Ocorreu um erro ao realizar a inscrição" });
             }
         }
+
+        /// <summary>
+        /// Cancelar a inscrição de um campeonato (apenas o líder do time pode cancelar) 
+        /// </summary>
+        [HttpDelete("{inscricaoId}")]
+        public async Task<IActionResult> CancelarInscricao(int inscricaoId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var userId = GetUserId();
+                var isLUserAdmin = IsUserAdmin();
+
+                var inscricao = await _inscricaoRepository.GetByIdAsync(inscricaoId, cancellationToken);
+                if (inscricao == null)
+                    return NotFound(new { message = "Inscrição não encontrada" });
+
+                var time = await _timeRepository.GetTimeWithJogadoresAsync(inscricao.TimeId, cancellationToken);
+                var isLider = time?.Players?.Any(p => p.UsuarioId == userId && p.isLider) ?? false;
+
+                if (!isLider && !isLUserAdmin)
+                    return Forbid("Apenas o líder do time pode cancelar a inscrição");
+
+                var campeonato = await _campeonatoRepository.GetByIdAsync(inscricao.CampeonatoId, cancellationToken);
+                if (campeonato != null && campeonato.DataInicio <= DateTime.UtcNow)
+                    return BadRequest(new { message = "Campeonato já iniciou, não é possível cancelar a inscrição" });
+
+                await _inscricaoRepository.DeleteAsync(inscricao, cancellationToken);
+                _logger.LogInformation($"Inscrição {inscricaoId} cancelada pelo usuário {userId}");
+
+                return Ok(new { message = "Inscrição cancelada com sucesso" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao cancelar inscrição");
+                return StatusCode(500, new { message = "Ocorreu um erro ao cancelar a inscrição" });
+            }
+        }
+
+        /// <summary>
+        /// Aprovar inscrição (apenas admin)
+        /// </summary>
+        [HttpPost("{inscricaoId}/aprovar")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AprovarInscricao(int inscricaoId, CancellationToken cancellationToken)
+        {
+            var atualizado = await _inscricaoRepository.UpdateStatusInscricaoAsync(inscricaoId, StatusInscricao.Confirmado, cancellationToken);
+
+            if (!atualizado)
+                return NotFound(new { message = "Inscrição não encontrada" });
+
+            _logger.LogInformation($"Inscrição {inscricaoId} aprovada pelo admin {GetUserId()}");
+
+            return Ok(new { message = "Inscrição aprovada com sucesso" });
+        }
+
+
+        /// <summary>
+        /// Rejeitar inscrição (apenas admin)
+        /// </summary>
+        [HttpPost("{inscricaoId}/rejeitar")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RejeitarInscricao(int inscricaoId, CancellationToken cancellationToken)
+        {
+            var atualizado = await _inscricaoRepository.UpdateStatusInscricaoAsync(inscricaoId, StatusInscricao.Cancelado, cancellationToken);
+
+            if (!atualizado)
+                return NotFound(new { message = "Inscrição não encontrada" });
+
+            _logger.LogInformation($"Inscrição {inscricaoId} rejeitada pelo admin {GetUserId()}");
+
+            return Ok(new { message = "Inscrição rejeitada com sucesso" });
+        }
+
+
+        /// <summary>
+        /// Eliminar time do campeonato (apenas admin)
+        /// </summary>
+      /*  [HttpPost("{inscricaoId}/eliminar")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> EliminarTime(int inscricaoId, CancellationToken cancellationToken)
+        {
+            var atualizado = await _inscricaoRepository.UpdateStatusInscricaoAsync(inscricaoId, StatusInscricao.Eliminado);
+
+            if (!atualizado)
+                return NotFound(new { message = "Inscrição não encontrada" });
+
+            _logger.LogInformation($"Time eliminado do campeonato (inscrição {inscricaoId}) pelo admin {GetUserId()}");
+
+            return Ok(new { message = "Time eliminado do campeonato" });
+        } */
+
+        /// <summary>
+        /// Setar um time como campeão (apenas admin)
+        /// </summary>
+        [HttpPost("{inscricaoId}/campeao")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DefinirCampeao(int inscricaoId, CancellationToken cancellationToken)
+        {
+            var inscricao = await _inscricaoRepository.GetByIdAsync(inscricaoId, cancellationToken);
+            if (inscricao == null)
+                return NotFound(new { message = "Inscrição não encontrada" });
+
+            await _inscricaoRepository.UpdateStatusInscricaoAsync(inscricaoId, StatusInscricao.Campeao, cancellationToken);
+
+            var campeonato = await _campeonatoRepository.GetByIdAsync(inscricao.CampeonatoId, cancellationToken);
+            if(campeonato != null)
+            {
+                var time = await _timeRepository.GetByIdAsync(inscricao.TimeId, cancellationToken);
+                campeonato.Campeao = time?.Nome ?? "Time Campeão";
+                await _campeonatoRepository.UpdateAsync(campeonato, cancellationToken);
+            }
+
+            _logger.LogInformation($"Time definido como campeão (inscrição {inscricaoId}) pelo admin {GetUserId()}");
+
+            return Ok(new { message = "Time definido como campeão do campeonato!" });
+        }
+
     }
 }

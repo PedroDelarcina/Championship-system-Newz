@@ -17,9 +17,9 @@ namespace Core.DTOs.Time
 
         public string? LogoUrl { get; set; }
 
-        [Required(ErrorMessage = "Lista de jogadores é obrigatória")]
+  /*      [Required(ErrorMessage = "Lista de jogadores é obrigatória")]
         [MinLength(1, ErrorMessage = "Time deve ter pelo menos 1 jogador")]
-        public List<string> JogadoresIds { get; set; } = new List<string>();
+        public List<string> JogadoresIds { get; set; } = new List<string>(); */
 
         public string? LiderId { get; set; } 
     }

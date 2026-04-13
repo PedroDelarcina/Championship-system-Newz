@@ -36,8 +36,8 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ObterTodosTimes(CancellationToken cancellationToken)
         {
-            var times = await _timeRepository.GetAllAsync(cancellationToken);
-            var result = times.Select(t => new TimeResponseDto
+            var times = await _timeRepository.GetAllWithPlayersAsync(cancellationToken);
+            var result = times.Select(t => new TimeListDto
             {
                 Id = t.Id,
                 Nome = t.Nome,
@@ -45,7 +45,7 @@ namespace API.Controllers
                 LogoUrl = t.LogoUrl,
                 DataCriacao = t.DataCriacao,
                 TotalJogadores = t.Players?.Count ?? 0,
-                Lider = t.Players?.FirstOrDefault(p => p.isLider)?.Player?.NickName
+                LiderNickname = t.Players?.FirstOrDefault(p => p.isLider)?.Player?.NickName
             });
 
             return Ok(result);
@@ -160,21 +160,22 @@ namespace API.Controllers
         /// <summary>
         /// Adicionar jogador ao time (apenas líder)
         ///</summary>
-        [HttpPost("{timeId}/adicionar-jogador")]
-        public async Task<IActionResult> AdicionarPlayerTime(int timeId, [FromBody] AddPlayerTimeDto addPlayerTimeDto, CancellationToken cancellationToken)
+        [HttpPost("adicionar-jogador")]
+        public async Task<IActionResult> AdicionarPlayerTime([FromBody] AddPlayerTimeDto addPlayerTimeDto, CancellationToken cancellationToken)
         {
             try
             {
                 var userId = GetUserId();
+                var isAdmin = IsUserAdmin();
 
-                var time = await _timeRepository.GetTimeWithJogadoresAsync(timeId, cancellationToken);
+                var time = await _timeRepository.GetTimeWithJogadoresAsync(addPlayerTimeDto.TimeId, cancellationToken);
                 if (time == null)
                 {
                     return NotFound(new { message = "Time não encontrado" });
                 }
 
                 var isLider = time.Players?.Any(p => p.UsuarioId == userId && p.isLider) ?? false;
-                if (!isLider)
+                if (!isLider && !isAdmin)
                     return Forbid("Apenas o líder do time pode adicionar jogadores");
 
                 if (time.Players?.Any(p => p.UsuarioId == addPlayerTimeDto.UsuarioId) == true)
@@ -186,15 +187,15 @@ namespace API.Controllers
 
                 var playerTime = new PlayerTime
                 {
-                    TimeId = timeId,
+                    TimeId = addPlayerTimeDto.TimeId,
                     UsuarioId = addPlayerTimeDto.UsuarioId,
-                    isLider = addPlayerTimeDto.IsLider
+                    isLider = false
                 };
 
                 await _dbContext.PlayerTimes.AddAsync(playerTime, cancellationToken);
                 await _dbContext.SaveChangesAsync(cancellationToken);
 
-                _logger.LogInformation($"Player {addPlayerTimeDto.UsuarioId} adicionado ao time {timeId}");
+                _logger.LogInformation($"Player {addPlayerTimeDto.UsuarioId} adicionado ao time {addPlayerTimeDto.TimeId}");
 
                 return Ok(new { message = "Jogador adicionado ao time com sucesso" });
             }
@@ -208,7 +209,7 @@ namespace API.Controllers
 
         /// <summary>
         /// Adicionar jogador ao time (apenas líder)
-        ///</summary>
+        /// </summary>
         [HttpDelete("{timeId}/remover-jogador/{usuarioId}")]
         public async Task<IActionResult> RemoverPlayerTime(int timeId, string usuarioId, CancellationToken cancellationToken)
         {
@@ -256,7 +257,6 @@ namespace API.Controllers
             {
                 _logger.LogError(ex, "Erro ao remover jogador do time");
                 return StatusCode(500, new { message = "Erro interno ao processar a solicitação" });
-
 
             }
         }

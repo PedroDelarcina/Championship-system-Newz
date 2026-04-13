@@ -12,5 +12,6 @@ namespace Core.Interfaces
         Task<bool> ExisteTimeWithNomeAsync(string nome, CancellationToken cancellationToken);
         Task<Time?> GetTimeByNomeAsync(string nome, CancellationToken cancellationToken);
         Task<IEnumerable<Time>> GetTimesByCampeonatoIdAsync(int campeonatoId, CancellationToken cancellationToken);
+        Task<IEnumerable<Time>> GetAllWithPlayersAsync(CancellationToken cancellationToken);
     }
 }
