@@ -8,7 +8,7 @@ namespace Core.DTOs.Inscricao
     {
         public int Id { get; set; }
         public DateTime DataInscricao { get; set; }
-        public string Status { get; set; } = string.Empty; // "Pendente", "Confirmado", "Eliminado", "Campeao"
+        public string Status { get; set; } = string.Empty; // "Pendente", "Confirmado", "Eliminado", "Campeão"
 
         public string CampeonatoNome { get; set; } = string.Empty;
         public DateTime CampeonatoDataInicio { get; set; }

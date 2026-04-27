@@ -8,6 +8,7 @@ namespace Core.Interfaces
 {
     public interface IInscricaoRepository : IRepository<Inscricao>
     {
+        Task<IEnumerable<Inscricao>> GetAllWithIncludesAsync(CancellationToken cancellationToken);
         Task<IEnumerable<Inscricao>> GetInscricoesByCampeonatoIdAsync(int campeonatoId, CancellationToken cancellationToken);
         Task<IEnumerable<Inscricao>> GetInscricoesByUsuarioIdAsync(string usuarioId, CancellationToken cancellationToken);
         Task<Inscricao?> GetInscricaoByCampeonatoAndTimeAsync(int campeonatoId, int timeId, CancellationToken cancellationToken);

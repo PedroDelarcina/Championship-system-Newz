@@ -44,18 +44,18 @@ namespace API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ObterTodasInscricoes(CancellationToken cancellationToken)
         {
-            var inscricoes = await _inscricaoRepository.GetAllAsync(cancellationToken);
+            var inscricoes = await _inscricaoRepository.GetAllWithIncludesAsync(cancellationToken);
 
             var result = inscricoes.Select(i => new InscricaoListDto
             {
                 Id = i.Id,
                 DataInscricao = i.DataInscricao,
                 Status = i.Status.ToString(),
-                CampeonatoNome = i.Campeonato.Nome ?? string.Empty,
+                CampeonatoNome = i.Campeonato.Nome ?? "Campeonato não encontrado",
                 CampeonatoDataInicio = i.Campeonato?.DataInicio ?? DateTime.MinValue,
-                TimeNome = i.Time.Nome ?? string.Empty,
+                TimeNome = i.Time.Nome ?? "Time não encontrado",
                 TimeTag = i.Time.Clantag ?? string.Empty,
-                TotalJogadores = i.Time.Players.Count
+                TotalJogadores = i.Time?.Players?.Count ?? 0
             });
 
             return Ok(result);
@@ -296,11 +296,11 @@ namespace API.Controllers
         /// <summary>
         /// Eliminar time do campeonato (apenas admin)
         /// </summary>
-      /*  [HttpPost("{inscricaoId}/eliminar")]
+        [HttpPost("{inscricaoId}/eliminar")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> EliminarTime(int inscricaoId, CancellationToken cancellationToken)
         {
-            var atualizado = await _inscricaoRepository.UpdateStatusInscricaoAsync(inscricaoId, StatusInscricao.Eliminado);
+            var atualizado = await _inscricaoRepository.UpdateStatusInscricaoAsync(inscricaoId, StatusInscricao.Eliminado, cancellationToken);
 
             if (!atualizado)
                 return NotFound(new { message = "Inscrição não encontrada" });
@@ -308,7 +308,7 @@ namespace API.Controllers
             _logger.LogInformation($"Time eliminado do campeonato (inscrição {inscricaoId}) pelo admin {GetUserId()}");
 
             return Ok(new { message = "Time eliminado do campeonato" });
-        } */
+        } 
 
         /// <summary>
         /// Setar um time como campeão (apenas admin)

@@ -10,8 +10,10 @@ namespace Infrastructure.Repositories
 {
     public class TimeRepository : Repository<Time>, ITimeRepository
     {
+        private readonly AppDbContext _context;
         public TimeRepository(AppDbContext context) : base(context)
         {
+            _context = context;
         }
 
         public async Task<bool> ExisteTimeWithNomeAsync(string nome, CancellationToken cancellationToken)

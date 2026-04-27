@@ -7,6 +7,8 @@ namespace Core.Interfaces
 {
     public interface ICampeonatoRepository : IRepository<Campeonato>
     {
+
+        Task<IEnumerable<Campeonato>> GetAllWithIncludesAsync(CancellationToken cancellationToken);
         Task<IEnumerable<Campeonato>> GetCampeonatosAtivosAsync(CancellationToken cancellationToken);
         Task<Campeonato?> GetCampeonatoInscricoesAsync(int id, CancellationToken cancellationToken);
         Task<IEnumerable<Campeonato>> GetCampeonatosByTipoAsync(string tipo, CancellationToken cancellationToken);

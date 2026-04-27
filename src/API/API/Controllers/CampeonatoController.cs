@@ -29,7 +29,7 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ObterTodosCampeonatos(CancellationToken cancellationtoken) 
         {
-            var campeonatos = await _campeonatoRepository.GetAllAsync(cancellationtoken);
+            var campeonatos = await _campeonatoRepository.GetAllWithIncludesAsync(cancellationtoken);
 
             var result = campeonatos.Select(c => new CampeonatoResponseDto
             {
@@ -37,6 +37,9 @@ namespace API.Controllers
                 Nome = c.Nome,
                 Tipo = c.TipoCampeonato,
                 DataInicio = c.DataInicio,
+                Campeao = c.Campeao,
+                RegrasExtras = c.RegrasExtras,
+                Status = c.DataInicio > DateTime.UtcNow ? "NaoIniciado" : c.DataFim < DateTime.UtcNow ? "Finalizado" : "EmAndamento",
                 DataFim = c.DataFim,
                 IsAtivo = c.IsAtivo,
                 TotalInscricoes = c.Inscricoes?.Count ?? 0
@@ -91,6 +94,9 @@ namespace API.Controllers
                 Tipo = c.TipoCampeonato,
                 DataInicio = c.DataInicio,
                 DataFim = c.DataFim,
+                Campeao = c.Campeao,
+                RegrasExtras = c.RegrasExtras,
+                Status = c.DataInicio > DateTime.UtcNow ? "NaoIniciado" : c.DataFim < DateTime.UtcNow ? "Finalizado" : "EmAndamento",
                 IsAtivo = c.IsAtivo,
                 TotalInscricoes = c.Inscricoes?.Count ?? 0
             });

@@ -16,9 +16,17 @@ namespace Infrastructure.Repositories
             
         }
 
+
+        public async Task<IEnumerable<Campeonato>> GetAllWithIncludesAsync(CancellationToken cancellationToken)
+        {
+            return await _dbSet
+                .Include(i => i.Inscricoes)
+                .OrderByDescending(i => i.DataInicio)
+                .ToListAsync(cancellationToken);
+        }
         public async Task<IEnumerable<Campeonato>> GetCampeonatosAtivosAsync(CancellationToken cancellationToken)
         {
-            return await _dbSet.Where(c => c.IsAtivo && c.DataFim > DateTime.UtcNow).OrderBy(c=> c.DataInicio).ToListAsync(cancellationToken);
+            return await _dbSet.Include(i => i.Inscricoes).Where(c => c.IsAtivo && c.DataFim > DateTime.UtcNow).OrderBy(c=> c.DataInicio).ToListAsync(cancellationToken);
         }
 
         public async Task<Campeonato?> GetCampeonatoInscricoesAsync(int id, CancellationToken cancellationToken)

@@ -15,6 +15,17 @@ namespace Infrastructure.Repositories
         {
         }
 
+        public async Task<IEnumerable<Inscricao>> GetAllWithIncludesAsync (CancellationToken cancellationToken)
+        {
+            return await _dbSet
+                         .Include(i => i.Campeonato)
+                         .Include(i => i.Time)
+                            .ThenInclude(t => t.Players)
+                         .Include(i => i.Usuario)
+                         .OrderByDescending(i => i.DataInscricao)
+                         .ToListAsync(cancellationToken);
+        }
+
         public async Task<Inscricao?> GetInscricaoByCampeonatoAndTimeAsync(int campeonatoId, int timeId, CancellationToken cancellationToken)
         {
             return await _dbSet.FirstOrDefaultAsync(i => i.CampeonatoId == campeonatoId && i.TimeId == timeId, cancellationToken);

@@ -57,6 +57,9 @@ namespace Infrastructure.Migrations
                     b.Property<string>("RegrasExtras")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("TipoCampeonato")
                         .IsRequired()
                         .HasMaxLength(50)

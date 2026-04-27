@@ -16,6 +16,6 @@ namespace Core.DTOs.Campeonato
         public string? Campeao { get; set; }
         public string? RegrasExtras { get; set; }
         public int TotalInscricoes { get; set; }
-        public string Status { get; set; } = string.Empty;
+        public string? Status { get; set; }
     }
 }
