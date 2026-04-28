@@ -6,4 +6,4 @@ export interface CampeonatoListDto {
   dataFim: Date;
   isAtivo: boolean;
   totalInscricoes: number;
-}
+} 

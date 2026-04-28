@@ -28,7 +28,7 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<Time>> GetTimeByUsuarioIdAsync(string usuarioId, CancellationToken cancellationToken)
         {
-            return await _dbSet.Where(j => j.Players.Any(u => u.UsuarioId == usuarioId)).Include(ps => ps.Players).ToListAsync(cancellationToken);
+            return await _dbSet.Where(j => j.Players.Any(u => u.UsuarioId == usuarioId)).Include(ps => ps.Players).ThenInclude(p => p.Player).ToListAsync(cancellationToken);
         }
 
         public async Task<Time?> GetTimeWithJogadoresAsync(int id, CancellationToken cancellationToken)

@@ -7,7 +7,9 @@ export interface InscricaoResponseDto {
   id: number;
   dataInscricao: Date;
   status: StatusInscricao;
-  campeonato: CampeonatoListDto;
-  time: TimeResponseDto;
-  usuario: UsuarioResponseDto;
+
+
+  campeonato: CampeonatoListDto[];
+  time: TimeResponseDto[];
+  usuario: UsuarioResponseDto[];
 }

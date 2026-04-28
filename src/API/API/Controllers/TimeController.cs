@@ -104,7 +104,8 @@ namespace API.Controllers
                 LogoUrl = t.LogoUrl,
                 DataCriacao = t.DataCriacao,
                 TotalJogadores = t.Players?.Count ?? 0,
-                Lider = t.Players?.FirstOrDefault(p => p.isLider)?.Player?.NickName
+                Lider = t.Players?.FirstOrDefault(p => p.isLider)?.Player?.NickName,
+                LiderId = t.Players?.FirstOrDefault(p => p.isLider)?.UsuarioId
             });
             return Ok(result);
         }
@@ -124,6 +125,10 @@ namespace API.Controllers
                 {
                     return BadRequest(new { message = "Já existe um time com esse nome" });
                 }
+
+                var liderEmOutroTime = await _dbContext.PlayerTimes.AnyAsync(pt => pt.UsuarioId == userId, cancellationToken);
+                if (liderEmOutroTime)
+                    return BadRequest(new { message = "Você já faz parte de um time. Não é possível criar ou participar de outro time." });
 
                 var time = new Time
                 {
@@ -180,6 +185,11 @@ namespace API.Controllers
 
                 if (time.Players?.Any(p => p.UsuarioId == addPlayerTimeDto.UsuarioId) == true)
                     return BadRequest(new { message = "Jogador já faz parte do time" });
+
+                var jogadorEmOutroTime = await _dbContext.PlayerTimes.AnyAsync(pt => pt.UsuarioId == addPlayerTimeDto.UsuarioId, cancellationToken);
+                if (jogadorEmOutroTime)
+                    return BadRequest(new { message = "Um jogador não pode participar de dois times simultaneamente." });
+                
 
                 var player = await _dbContext.Users.FindAsync(addPlayerTimeDto.UsuarioId);
                 if (player == null)
@@ -258,6 +268,37 @@ namespace API.Controllers
                 _logger.LogError(ex, "Erro ao remover jogador do time");
                 return StatusCode(500, new { message = "Erro interno ao processar a solicitação" });
 
+            }
+        }
+
+
+        ///<summary>
+        /// Deletar time (apenas lider ou admins)
+        /// </summary>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletarTime (int id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var userId = GetUserId();
+                var isAdmin = IsUserAdmin();
+
+                var time = await _timeRepository.GetByIdAsync(id, cancellationToken);
+
+                if (time == null)
+                    return NotFound("Time não encontrado");
+
+                var isLider = time.Players?.Any(p => p.UsuarioId == userId && p.isLider) ?? false;
+                if (!isLider && !isAdmin)
+                    return Forbid("Apenas o líder ou Admin pode deletar o time");
+
+                await _timeRepository.DeleteAsync(time, cancellationToken);
+                _logger.LogInformation($"Time deletado: {time.Nome} pelo usuario {GetUserId()} ");
+
+                return Ok(new { message = "Time deletado com sucesso! " });
+            } catch(Exception ex)
+            {
+                throw new Exception("Falha ao tentar deletar esse time", ex);
             }
         }
     }

@@ -6,7 +6,9 @@ export interface TimeResponseDto {
   clanTag?: string;
   logoUrl?: string;
   dataCriacao: Date;
-  jogadores: UsuarioResponseDto[];
-  lider?: UsuarioResponseDto;
+  lider?: string;
+  liderId?: string;
   totalJogadores: number;
+
+  jogadores: UsuarioResponseDto[];
 }

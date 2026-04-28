@@ -223,7 +223,7 @@ namespace API.Controllers
         /// <summary>
         /// Cancelar a inscrição de um campeonato (apenas o líder do time pode cancelar) 
         /// </summary>
-        [HttpDelete("{inscricaoId}")]
+        [HttpDelete("{inscricaoId}/cancelarInscricao")]
         public async Task<IActionResult> CancelarInscricao(int inscricaoId, CancellationToken cancellationToken)
         {
             try
@@ -334,6 +334,25 @@ namespace API.Controllers
             _logger.LogInformation($"Time definido como campeão (inscrição {inscricaoId}) pelo admin {GetUserId()}");
 
             return Ok(new { message = "Time definido como campeão do campeonato!" });
+        }
+
+
+        /// <summary>
+        /// Remover inscrição completamente (apenas admin)
+        /// </summary>
+        [HttpDelete("{inscricaoId}/removerInscricao")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RemoverInscricao(int inscricaoId, CancellationToken cancellationToken)
+        {
+            var inscricao = await _inscricaoRepository.GetByIdAsync(inscricaoId, cancellationToken);
+            if (inscricao == null)
+                return NotFound(new { message = "Inscrição não encontrada" });
+
+            await _inscricaoRepository.DeleteAsync(inscricao, cancellationToken);
+
+            _logger.LogInformation($"Inscrição {inscricaoId} removida permanentemente pelo admin {GetUserId()}");
+
+            return Ok(new { message = "Inscrição removida permanentemente. Agora o time pode ser deletado." });
         }
 
     }

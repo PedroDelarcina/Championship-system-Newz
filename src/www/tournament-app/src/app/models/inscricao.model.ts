@@ -11,7 +11,9 @@ export interface Inscricao {
   campeonatoId: number;
   timeId: number;
   usuarioId: string;
-  campeonato?: Campeonato;
-  time?: Time;
-  usuario?: Usuario;
+
+
+  campeonato?: Campeonato[];
+  time?: Time[];
+  usuario?: Usuario[];
 }

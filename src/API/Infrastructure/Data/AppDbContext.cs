@@ -85,6 +85,10 @@ namespace Infrastructure.Data
                 entity.Property(u => u.NickName).HasMaxLength(50);
                 entity.HasIndex(u => u.NickName).IsUnique();
             });
+
+            builder.Entity<PlayerTime>()
+                   .HasIndex(pt => pt.UsuarioId)
+                   .IsUnique();
         }
     }
 }
