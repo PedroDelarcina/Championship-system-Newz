@@ -50,7 +50,7 @@ namespace API.Controllers
 
                 var user = new Usuario
                 {
-                    UserName = registroDto.UserName,
+                    UserName = registroDto.Email,
                     Email = registroDto.Email,
                     NickName = registroDto.Nickname,
                     DataRegistro = DateTime.UtcNow,

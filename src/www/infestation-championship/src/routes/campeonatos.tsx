@@ -49,7 +49,7 @@ function CampeonatosPage() {
       <PageHeader
         eyebrow="Data Grid"
         title="Campeonatos"
-        description="Todos os circuitos disponíveis. Filtre por status para encontrar o seu próximo desafio."
+        description="Todos os campeonatos disponíveis. Filtre por status para encontrar o seu próximo desafio."
       />
 
       <div className="flex flex-wrap gap-2 mb-8 border-b border-obsidian-border pb-4">

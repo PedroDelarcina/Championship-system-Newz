@@ -14,7 +14,7 @@ export const Route = createFileRoute("/register")({
       { title: "Registrar — Infestation Tournament" },
       {
         name: "description",
-        content: "Crie sua conta de operativo e entre nos circuitos.",
+        content: "Crie sua conta de operativo e entre nos desafios.",
       },
     ],
   }),
