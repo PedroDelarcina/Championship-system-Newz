@@ -10,11 +10,11 @@ import { statusCampeonatoKind } from "@/lib/status";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Infestation Tournament — A Lenda Nasce na Arena" },
+      { title: "Infestation Tournament" },
       {
         name: "description",
         content:
-          "Veja os campeonatos ativos da comunidade Infestation: The New Z. Inscreva seu squad e dispute pelo topo.",
+          "Veja os campeonatos ativos da comunidade Infestation: The New Z. Inscreva seu Clan e dispute pelo topo.",
       },
     ],
   }),
@@ -24,7 +24,9 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const { data, isLoading, error } = useCampeonatos();
   const ativos =
-    data?.filter((c) => statusCampeonatoKind(c.status) !== "finished") ?? [];
+    data?.filter(
+      (c) => c.status != null && statusCampeonatoKind(c.status) !== "finished"
+    ) ?? [];
 
   return (
     <>
@@ -36,21 +38,20 @@ function HomePage() {
         <div className="max-w-[1440px] mx-auto px-6 w-full flex flex-col items-center text-center relative z-10">
           <div className="cyber-badge inline-block bg-obsidian-border border border-obsidian-border px-4 py-1.5 mb-8">
             <span className="text-blood-bright font-bold tracking-[0.2em] text-xs uppercase">
-              Season 04 • Inscrições Abertas
+              Inscrições Abertas
             </span>
           </div>
 
           <h1 className="font-display text-6xl md:text-8xl lg:text-[9rem] font-bold uppercase leading-[0.85] tracking-tight mb-6 drop-shadow-2xl">
-            A Lenda Nasce
+            Campeonatos e 
             <br />
             <span className="text-transparent bg-clip-text bg-linear-to-r from-blood-bright to-white">
-              Na Arena
+              Torneios
             </span>
           </h1>
 
           <p className="max-w-[65ch] text-muted-foreground text-base md:text-xl font-medium tracking-wide mb-12 uppercase text-balance">
             A maior plataforma de gestão de campeonatos da comunidade Infestation: The New Z.
-            Convoque seu squad, domine a chave e grave seu nome no obelisco dos campeões.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -58,7 +59,7 @@ function HomePage() {
               to="/campeonatos"
               className="cyber-cut bg-blood text-white font-bold uppercase tracking-widest text-base md:text-lg px-10 md:px-12 py-4 hover:bg-blood-bright transition-colors glow-blood inline-flex items-center gap-3"
             >
-              Explorar Circuitos <ArrowRight className="size-5" />
+              Explorar Campeonatos <ArrowRight className="size-5" />
             </Link>
             <Link
               to="/meus-times/novo"
@@ -79,7 +80,7 @@ function HomePage() {
                 Live Now
               </p>
               <h2 className="font-display text-4xl md:text-5xl font-bold uppercase tracking-wide leading-none">
-                Circuitos Ativos
+                Campeonatos Ativos
               </h2>
               <div className="h-1 w-24 bg-blood-bright mt-4" />
             </div>
@@ -91,7 +92,7 @@ function HomePage() {
             </Link>
           </div>
 
-          {isLoading && <PageLoader label="Carregando circuitos…" />}
+          {isLoading && <PageLoader label="Carregando campeonatos…" />}
           {error && (
             <ErrorBox
               message={getApiErrorMessage(error)}
@@ -108,7 +109,7 @@ function HomePage() {
           )}
           {!isLoading && !error && ativos.length === 0 && (
             <EmptyState
-              title="Nenhum circuito ativo"
+              title="Nenhum campeonato ativo"
               description="Aguarde — novos campeonatos serão anunciados em breve."
             />
           )}

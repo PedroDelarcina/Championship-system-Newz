@@ -11,7 +11,7 @@ export function Footer() {
           </span>
         </div>
         <p className="text-xs uppercase tracking-widest text-muted-foreground">
-          © {new Date().getFullYear()} Community Tournaments • All Rights Reserved
+          © {new Date().getFullYear()} Community Tournaments • All Rights Reserved @PedroDelarcina
         </p>
       </div>
     </footer>
