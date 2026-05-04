@@ -2,12 +2,12 @@
 using Core.DTOs.Auth;
 using Core.DTOs.Time;
 using Core.DTOs.Campeonato;
-using Core.Interfaces;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Core.Entities;
 using Core.Entities.Enums;
+using Core.Interfaces.Repositories;
 
 namespace API.Controllers
 {

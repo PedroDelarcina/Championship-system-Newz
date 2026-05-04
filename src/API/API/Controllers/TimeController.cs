@@ -1,12 +1,12 @@
 ﻿using Core.DTOs.Time;
 using Core.Entities;
 using Core.DTOs.Auth;
-using Core.Interfaces;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Core.DTOs.PlayerTimeDto;
 using Microsoft.EntityFrameworkCore;
+using Core.Interfaces.Repositories;
 
 namespace API.Controllers
 {

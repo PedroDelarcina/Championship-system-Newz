@@ -80,7 +80,7 @@ function AdminCampeonatosPage() {
       <PageHeader
         eyebrow="Admin Console"
         title="Campeonatos"
-        description="CRUD completo de campeonatos."
+        description="Informações completas dos campeonatos."
         actions={
           <>
             <Link

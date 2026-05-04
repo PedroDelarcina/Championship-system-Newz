@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Core.Entities;
 using Core.DTOs.Campeonato;
-using Core.Interfaces;
 using Core.Entities.Enums;
+using Core.Interfaces.Repositories;
 
 namespace API.Controllers
 {

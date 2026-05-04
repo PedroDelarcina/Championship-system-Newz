@@ -1,7 +1,7 @@
 using API.Extensions;
 using API.Service;
 using Core.Entities;
-using Core.Interfaces;
+using Core.Interfaces.Repositories;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

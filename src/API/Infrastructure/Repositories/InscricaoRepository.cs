@@ -1,11 +1,11 @@
 ﻿using Core.Entities;
-using Core.Interfaces;
 using Core.Entities.Enums;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Core.Interfaces.Repositories;
 
 namespace Infrastructure.Repositories
 {
