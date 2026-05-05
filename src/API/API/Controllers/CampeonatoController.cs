@@ -5,6 +5,7 @@ using Core.Entities;
 using Core.DTOs.Campeonato;
 using Core.Entities.Enums;
 using Core.Interfaces.Repositories;
+using Core.Interfaces.Services;
 
 namespace API.Controllers
 {
@@ -12,12 +13,12 @@ namespace API.Controllers
     [ApiController]
     public class CampeonatoController : BaseController
     {
-        private readonly ICampeonatoRepository _campeonatoRepository;
+        private readonly ICampeonatoService _campeonatoService;
         private readonly ILogger<CampeonatoController> _logger;
 
-        public CampeonatoController(ICampeonatoRepository campeonatoRepository, ILogger<CampeonatoController> logger)
+        public CampeonatoController(ICampeonatoService campeonatoService, ILogger<CampeonatoController> logger)
         {
-            _campeonatoRepository = campeonatoRepository;
+            _campeonatoService = campeonatoService;
             _logger = logger;
         }
 
@@ -29,21 +30,7 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ObterTodosCampeonatos(CancellationToken cancellationtoken) 
         {
-            var campeonatos = await _campeonatoRepository.GetAllWithIncludesAsync(cancellationtoken);
-
-            var result = campeonatos.Select(c => new CampeonatoResponseDto
-            {
-                Id = c.Id,
-                Nome = c.Nome,
-                Tipo = c.TipoCampeonato,
-                DataInicio = c.DataInicio,
-                Campeao = c.Campeao,
-                RegrasExtras = c.RegrasExtras,
-                Status = c.DataInicio > DateTime.UtcNow ? "NaoIniciado" : c.DataFim < DateTime.UtcNow ? "Finalizado" : "EmAndamento",
-                DataFim = c.DataFim,
-                IsAtivo = c.IsAtivo,
-                TotalInscricoes = c.Inscricoes?.Count ?? 0
-            });
+            var result = await _campeonatoService.ObterTodosCampeonatos(cancellationtoken);
 
             return Ok(result);
         }
@@ -55,26 +42,11 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ObterCampeonatosById (int id, CancellationToken cancellationToken)
         {
-            var campeonatoId = await _campeonatoRepository.GetCampeonatoInscricoesAsync(id, cancellationToken);
-            if(campeonatoId == null)
+            var result = await _campeonatoService.ObterCampeonatoPorIdAsync(id, cancellationToken);
+            if(result == null)
             {
                 return NotFound(new { message = "Campeonato não encontrado" });
             }
-
-            var result = new CampeonatoResponseDto
-            {
-                Id = campeonatoId.Id,
-                Nome = campeonatoId.Nome,
-                Tipo = campeonatoId.TipoCampeonato,
-                DescricaoRegras = campeonatoId.DescricaoRegras,
-                DataInicio = campeonatoId.DataInicio,
-                DataFim = campeonatoId.DataFim,
-                IsAtivo = campeonatoId.IsAtivo,
-                Campeao = campeonatoId.Campeao,
-                RegrasExtras = campeonatoId.RegrasExtras,
-                TotalInscricoes = campeonatoId.Inscricoes?.Count ?? 0,
-                Status = campeonatoId.DataInicio > DateTime.UtcNow ? "NaoIniciado" : campeonatoId.DataFim < DateTime.UtcNow ? "Finalizado" : "EmAndamento"
-            };
 
             return Ok(result);
         }
@@ -86,20 +58,7 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ObterCampeonatosAtivos (CancellationToken cancellationToken)
         {
-            var campeonatos = await _campeonatoRepository.GetCampeonatosAtivosAsync(cancellationToken);
-            var result = campeonatos.Select(c => new CampeonatoResponseDto
-            {
-                Id = c.Id,
-                Nome = c.Nome,
-                Tipo = c.TipoCampeonato,
-                DataInicio = c.DataInicio,
-                DataFim = c.DataFim,
-                Campeao = c.Campeao,
-                RegrasExtras = c.RegrasExtras,
-                Status = c.DataInicio > DateTime.UtcNow ? "NaoIniciado" : c.DataFim < DateTime.UtcNow ? "Finalizado" : "EmAndamento",
-                IsAtivo = c.IsAtivo,
-                TotalInscricoes = c.Inscricoes?.Count ?? 0
-            });
+            var result = await _campeonatoService.ObterCampeonatosAtivosAsync(cancellationToken);
 
             return Ok(result);
         }
@@ -113,37 +72,17 @@ namespace API.Controllers
         {
             try
             {
-                if (campDto.DataInicio >= campDto.DataFim)
-                {
-                    return BadRequest(new { message = "A data de início deve ser anterior à data de fim." });
-                }
+                var adminUserId = GetUserId();
+
+                var campeonatoId = await _campeonatoService.CriarCampeonatoAsync(campDto, adminUserId, cancellationToken);
                 
-                if(campDto.DataInicio < DateTime.UtcNow)
-                {
-                    return BadRequest(new { message = "A data de início não pode ser no passado." });
-                }
+                return Ok(new { message = "Campeonato criado com sucesso", campeonatoId });
 
-                var conflito = await _campeonatoRepository.ExisteCampeonatosAtivosAsync(campDto.DataInicio, campDto.DataFim);
-                if(conflito)
-                    return BadRequest(new { message = "Já existe um campeonato ativo nesse período." });
-
-                var campeonato = new Campeonato
-                {
-                    Nome = campDto.Nome,
-                    TipoCampeonato = campDto.TipoCampeonato,
-                    DescricaoRegras = campDto.DescricaoRegras,
-                    DataInicio = campDto.DataInicio,
-                    DataFim = campDto.DataFim,
-                    MaxParticipantes = campDto.MaxParticipantes,
-                    RegrasExtras = campDto.RegrasExtras,
-                    IsAtivo = true
-                };
-
-                var result = await _campeonatoRepository.AddAsync(campeonato, cancellationToken);
-
-                _logger.LogInformation($"Campeonato criado com sucesso: {result.Nome} por admin {GetUserId()}");
-
-                return Ok(new { message = "Campeonato criado com sucesso", campeonatoId = result.Id });
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Erro ao criar campeonato");
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -159,30 +98,28 @@ namespace API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AtualizaCampeonato(int id, [FromBody] CampeonatoRequestDto campeonatoRequestDto, CancellationToken cancellationToken)
         {
-            var campeonato = await _campeonatoRepository.GetByIdAsync(id, cancellationToken);
-            if (campeonato == null)
-                return NotFound(new { message = "Campeonato não encontrado" });
+            try
+            {
+                var adminUserId = GetUserId();
 
-            if (campeonatoRequestDto.DataInicio >= campeonatoRequestDto.DataFim)
-                return BadRequest(new { message = "Data de início deve ser anterior à data de fim" });
+                await _campeonatoService.AtualizarCampeonatoAsync(id, campeonatoRequestDto, adminUserId, cancellationToken);
 
-            var conflito = await _campeonatoRepository.ExisteCampeonatosAtivosAsync(campeonatoRequestDto.DataInicio, campeonatoRequestDto.DataFim, id, cancellationToken);
-            if (conflito)
-                return BadRequest(new { message = "Já existe outro campeonato ativo nesse periodo" });
+                return Ok(new { message = "Campeonato atualizado com sucesso" });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
 
-            campeonato.Nome = campeonatoRequestDto.Nome;
-            campeonato.TipoCampeonato = campeonatoRequestDto.TipoCampeonato;
-            campeonato.DescricaoRegras = campeonatoRequestDto.DescricaoRegras;
-            campeonato.DataInicio = campeonatoRequestDto.DataInicio;
-            campeonato.DataFim = campeonatoRequestDto.DataFim;
-            campeonato.MaxParticipantes = campeonatoRequestDto.MaxParticipantes;
-            campeonato.RegrasExtras = campeonatoRequestDto.RegrasExtras;
-
-            await _campeonatoRepository.UpdateAsync(campeonato, cancellationToken);
-            _logger.LogInformation($"Campeonato atualizado: {campeonato.Nome} por admin {GetUserId()}");
-
-            return Ok(new { message = "Campeonato atualizado com sucesso" });
-           
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao atualizar campeonato");
+                return StatusCode(500, new { message = "Erro interno ao processar solicitação" });
+            }
         }
 
         ///<summary>
@@ -192,15 +129,22 @@ namespace API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AlternarStatusCampeonato (int id, CancellationToken cancellationToken)
         {
-            var campeonato = await _campeonatoRepository.GetByIdAsync(id, cancellationToken);
-            if (campeonato == null)
-                return NotFound(new { message = "Campeonato não encontrado" });
+            try
+            {
+                var adminUserId = GetUserId();
+                await _campeonatoService.AlternarStatusCampeonatoAsync(id, adminUserId, cancellationToken);
+                return Ok(new { message = "Status do campeonato alternado com sucesso" });
 
-            campeonato.IsAtivo = !campeonato.IsAtivo;
-            await _campeonatoRepository.UpdateAsync(campeonato, cancellationToken);
-
-            var status = campeonato.IsAtivo ? "ativado" : "desativado";
-            return Ok(new { message = $"Campeonato {status} com sucesso" });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao alternar status do campeonato");
+                return StatusCode(500, new { message = "Erro interno ao processar solicitação" });
+            }
         }
 
 
@@ -210,18 +154,23 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeletarCampeonato (int id, CancellationToken cancellationToken)
-        { 
-            var campeonato = await _campeonatoRepository.GetByIdAsync(id, cancellationToken);
-            if(campeonato == null)
-                return NotFound(new { message = "Campeonato não encontrado" });
+        {
+            try
+            {
+                var adminUserId = GetUserId();
 
-            if(campeonato.Inscricoes != null && campeonato.Inscricoes.Any())
-                return BadRequest(new { message = "Não é possível deletar um campeonato com inscrições ativas" });
-
-            await _campeonatoRepository.DeleteAsync(campeonato, cancellationToken);
-            _logger.LogInformation($"Campeonato deletado: {campeonato.Nome} por admin {GetUserId()}");
-
-            return Ok(new { message = "Campeonato deletado com sucesso" });
+                var campeonato = await _campeonatoService.DeletarCampeonatoAsync(id, adminUserId, cancellationToken);
+                return Ok(new { message = "Campeonato deletado com sucesso" });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao deletar campeonato");
+                return StatusCode(500, new { message = "Erro interno ao processar solicitação" });
+            }
         }
     }
 }

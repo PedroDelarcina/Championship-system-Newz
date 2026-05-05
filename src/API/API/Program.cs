@@ -2,6 +2,7 @@ using API.Extensions;
 using API.Service;
 using Core.Entities;
 using Core.Interfaces.Repositories;
+using Core.Interfaces.Services;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -30,6 +31,9 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 
 //registrar Services
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<ICampeonatoService, CampeonatoService>();
+//builder.Services.AddScoped<ITimeService, TimeService>();
+//builder.Services.AddScoped<IInscricaoService, InscricaoService>();
 
 
 //registrar Repositories

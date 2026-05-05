@@ -9,16 +9,16 @@ namespace Core.Interfaces.Services
     {
         Task<IEnumerable<CampeonatoResponseDto>> ObterTodosCampeonatos(CancellationToken cancellationToken);
 
-        Task<CampeonatoResponseDto?> ObterCampeonatoPorId(int id, CancellationToken cancellationToken);
+        Task<CampeonatoResponseDto?> ObterCampeonatoPorIdAsync(int id, CancellationToken cancellationToken);
 
-        Task<IEnumerable<CampeonatoResponseDto>> ObterCampeonatosAtivos(CancellationToken cancellationToken);
+        Task<IEnumerable<CampeonatoResponseDto>> ObterCampeonatosAtivosAsync(CancellationToken cancellationToken);
 
-        Task<CampeonatoResponseDto> CriarCampeonato(CampeonatoRequestDto requestDto, string adminUserId, CancellationToken cancellationToken);
+        Task<int> CriarCampeonatoAsync(CampeonatoRequestDto requestDto, string adminUserId, CancellationToken cancellationToken);
 
-        Task<CampeonatoResponseDto?> AtualizarCampeonato(int id, CampeonatoRequestDto requestDto, string adminUserId, CancellationToken cancellationToken);
+        Task<bool> AtualizarCampeonatoAsync(int id, CampeonatoRequestDto requestDto, string adminUserId, CancellationToken cancellationToken);
 
-        Task<bool> AlternarStatusCampeonato(int id, string adminUserId, CancellationToken cancellationToken);
+        Task<bool> AlternarStatusCampeonatoAsync(int id, string adminUserId, CancellationToken cancellationToken);
 
-        Task<bool> DeletarCampeonato(int id, string adminUserId, CancellationToken cancellationToken);
+        Task<bool> DeletarCampeonatoAsync(int id, string adminUserId, CancellationToken cancellationToken);
     }
 }
