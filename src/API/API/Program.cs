@@ -32,8 +32,8 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 //registrar Services
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<ICampeonatoService, CampeonatoService>();
-//builder.Services.AddScoped<ITimeService, TimeService>();
-//builder.Services.AddScoped<IInscricaoService, InscricaoService>();
+builder.Services.AddScoped<ITimeService, TimeService>();
+builder.Services.AddScoped<IInscricaoService, InscricaoService>();
 
 
 //registrar Repositories

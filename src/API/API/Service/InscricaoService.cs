@@ -33,7 +33,9 @@ namespace API.Service
 
         public async Task<IEnumerable<InscricaoListDto>> ObterTodasInscricoesAsync(CancellationToken cancellationToken)
         {
-            var inscricoes = await _inscricaoRepository.GetAllAsync(cancellationToken);
+           // var inscricoes = await _inscricaoRepository.GetAllAsync(cancellationToken);
+
+            var inscricoes = await _inscricaoRepository.GetAllWithIncludesAsync(cancellationToken);
 
             return inscricoes.Select(i => new InscricaoListDto
             {
