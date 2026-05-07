@@ -425,3 +425,5 @@ FodyWeavers.xsd
 **/bin/
 **/obj/
 **/Migrations/
+
+*.env

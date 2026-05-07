@@ -122,7 +122,8 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("TimeId", "UsuarioId");
 
-                    b.HasIndex("UsuarioId");
+                    b.HasIndex("UsuarioId")
+                        .IsUnique();
 
                     b.ToTable("PlayerTimes");
                 });
