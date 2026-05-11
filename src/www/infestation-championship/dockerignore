@@ -1,0 +1,7 @@
+node_modules
+dist
+.tanstack
+.wrangler
+.git
+.env
+.env.local
