@@ -17,8 +17,9 @@ namespace API.Service
             _logger = logger;
         }
 
-        private static string CalcularStatus(DateTime dataInicio, DateTime dataFim)
+        private static string CalcularStatus(bool isAtivo, DateTime dataInicio, DateTime dataFim)
         {
+            if (!isAtivo) return "Desativado";
             var now = DateTime.UtcNow;
             if (dataInicio > now) return "NaoIniciado";
             if (dataFim < now) return "Finalizado";
@@ -41,7 +42,7 @@ namespace API.Service
                 Campeao = c.Campeao,
                 RegrasExtras = c.RegrasExtras,
                 TotalInscricoes = c.Inscricoes.Count(),
-                Status = CalcularStatus(c.DataInicio, c.DataFim)
+                Status = CalcularStatus(c.IsAtivo, c.DataInicio, c.DataFim)
             });
         }
 
@@ -63,7 +64,7 @@ namespace API.Service
                 Campeao = campeonato.Campeao,
                 RegrasExtras = campeonato.RegrasExtras,
                 TotalInscricoes = campeonato.Inscricoes?.Count ?? 0,
-                Status = CalcularStatus(campeonato.DataInicio, campeonato.DataFim)
+                Status = CalcularStatus(campeonato.IsAtivo, campeonato.DataInicio, campeonato.DataFim)
             };
         }
 
@@ -83,7 +84,7 @@ namespace API.Service
                 Campeao = c.Campeao,
                 RegrasExtras = c.RegrasExtras,
                 TotalInscricoes = c.Inscricoes?.Count ?? 0,
-                Status = CalcularStatus(c.DataInicio, c.DataFim)
+                Status = CalcularStatus(c.IsAtivo, c.DataInicio, c.DataFim)
             });
         }
 

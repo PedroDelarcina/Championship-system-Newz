@@ -25,12 +25,8 @@ const schema = z.object({
     .optional()
     .or(z.literal("")),
   logoUrl: z
-    .string()
-    .trim()
-    .url("URL inválida")
-    .max(500)
-    .optional()
-    .or(z.literal("")),
+    .union([z.literal(""), z.string().trim().url("URL inválida").max(500)])
+    .optional(),
 });
 type FormData = z.infer<typeof schema>;
 

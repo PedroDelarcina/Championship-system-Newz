@@ -124,6 +124,7 @@ namespace API.Controllers
         /// Listar inscrições de um campeonato
         /// </summary>
         [HttpGet("campeonato/{campeonatoId}")]
+        [AllowAnonymous]
         public async Task<IActionResult> ObterInscricoesCampeonato(int campeonatoId, CancellationToken cancellationToken)
         {
             var result = await _inscricaoService.ObterInscricoesCampeonatoAsync(campeonatoId, cancellationToken);
@@ -135,6 +136,7 @@ namespace API.Controllers
         /// Inscrever um time em um campeonato 
         /// </summary>  
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> InscreverTimeCampeonato([FromBody] InscricaoRequestDto inscricaoRequestDto, CancellationToken cancellationToken)
         {
             try

@@ -79,7 +79,16 @@ function CampeonatoDetalhePage() {
   const meuTime = meusTimes?.[0];
   const souLider = meuTime ? String(meuTime.liderId) === String(user?.id) : false;
   const jaInscrito = meuTime
-    ? c.inscricoes?.some((i) => i.timeNome === meuTime.nome)
+    ? c.inscricoes?.some((i) => {
+        const mesmoTime =
+          (typeof i.timeId === "number" &&
+            i.timeId > 0 &&
+            i.timeId === meuTime.id) ||
+          (!i.timeId && i.timeNome === meuTime.nome);
+        return (
+          mesmoTime && String(i.status).toLowerCase() !== "cancelado"
+        );
+      })
     : false;
 
   const podeInscrever =
@@ -87,7 +96,8 @@ function CampeonatoDetalhePage() {
     !!meuTime &&
     souLider &&
     !jaInscrito &&
-    kind === "open";
+    kind === "open" &&
+    c.isAtivo !== false;
 
   const handleInscrever = async () => {
     try {
@@ -223,6 +233,11 @@ function CampeonatoDetalhePage() {
           </div>
 
           {/* CTA contextual */}
+          {kind === "disabled" && (
+            <div className="cyber-cut bg-destructive/10 border border-destructive/40 p-4 text-center text-xs text-destructive uppercase tracking-wider font-bold">
+              Campeonato desativado pelo administrador — inscrições indisponíveis.
+            </div>
+          )}
           {!user && (
             <Link
               to="/login"

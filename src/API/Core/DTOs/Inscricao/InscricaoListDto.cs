@@ -14,6 +14,7 @@ namespace Core.DTOs.Inscricao
         public DateTime CampeonatoDataInicio { get; set; }
         public string TimeNome { get; set; } = string.Empty;
         public string TimeTag { get; set; } = string.Empty;
+        public int TimeId { get; set; }
         public int TotalJogadores { get; set; }
 
     }

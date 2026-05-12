@@ -1,18 +1,21 @@
 import type { StatusCampeonato, StatusInscricao } from "@/types/api";
 
-export function statusCampeonatoLabel(s: StatusCampeonato): string {
+export function statusCampeonatoLabel(s: StatusCampeonato | undefined): string {
   const map: Record<string, string> = {
     NaoIniciado: "Inscrições Abertas",
     EmAndamento: "Em Andamento",
     Finalizado: "Finalizado",
+    Desativado: "Desativado",
   };
-  return map[s] ?? String(s);
+  const key = s == null ? "" : String(s);
+  return map[key] ?? (s == null ? "—" : String(s));
 }
 
-export type StatusKind = "open" | "running" | "finished" | "other";
+export type StatusKind = "open" | "running" | "finished" | "disabled" | "other";
 
-export function statusCampeonatoKind(s: StatusCampeonato): StatusKind {
-  const v = String(s).toLowerCase();
+export function statusCampeonatoKind(s: StatusCampeonato | undefined): StatusKind {
+  const v = String(s ?? "").toLowerCase();
+  if (v.includes("desativ")) return "disabled";
   if (v.includes("naoiniciado") || v.includes("abert")) return "open";
   if (v.includes("andament")) return "running";
   if (v.includes("final")) return "finished";

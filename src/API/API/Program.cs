@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
+using System.Text.Json;
 
 
 
@@ -45,11 +46,16 @@ builder.Services.AddScoped<ITimeRepository, TimeRepository>();
 builder.Services.AddScoped<IInscricaoRepository, InscricaoRepository>();
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o =>
+    {
+        o.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        o.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
+builder.Services.AddOpenApi();
 
 builder.Services.AddCors(options =>
 {
@@ -66,10 +72,6 @@ builder.Services.AddCors(options =>
 
 
 // Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
@@ -102,7 +104,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Em Development o front usa http://localhost:7180/api; com dois listen URLs (perfil https)
+// o redirecionamento quebraria as chamadas. Em Production (ex.: Docker só HTTP) o middleware
+// não redireciona se não houver HTTPS configurado.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseCors("AllowFrontend");
 

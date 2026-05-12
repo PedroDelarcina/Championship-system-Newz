@@ -1,6 +1,12 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Plus, Trophy, Users } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 import { useMeusTimes } from "@/hooks/api";
 import {
   EmptyState,
@@ -16,10 +22,22 @@ export const Route = createFileRoute("/meus-times")({
   head: () => ({
     meta: [{ title: "Meus Times — Infestation Tournament" }],
   }),
-  component: MeusTimesPage,
+  component: MeusTimesLayout,
 });
 
-function MeusTimesPage() {
+function MeusTimesLayout() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isLista =
+    pathname === "/meus-times" || pathname === "/meus-times/";
+
+  if (!isLista) {
+    return <Outlet />;
+  }
+
+  return <MeusTimesLista />;
+}
+
+function MeusTimesLista() {
   const navigate = useNavigate();
   const token = useAuthStore((s) => s.token);
   const { user } = useAuthStore();

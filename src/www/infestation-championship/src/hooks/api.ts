@@ -59,11 +59,13 @@ export function useCampeonatos(status?: string) {
 export function useCampeonato(id: string | number | undefined) {
   return useQuery({
     queryKey: ["campeonato", id],
-    enabled: id !== undefined,
+    enabled: id !== undefined && id !== "",
     queryFn: async () => {
-      const [campeonatoRes, inscricoesRes] = await Promise.all([
-        api.get<CampeonatoResponseDto>(`/Campeonato/${id}`),
-        api.get<InscricaoListDto[]>(`/Inscricao/campeonato/${id}`),
+        const [campeonatoRes, inscricoesRes] = await Promise.all([
+        api.get<CampeonatoResponseDto>(`/Campeonato/${id}`, { skipAuth: true }),
+        api.get<InscricaoListDto[]>(`/Inscricao/campeonato/${id}`, {
+          skipAuth: true,
+        }),
       ]);
       return {
         ...campeonatoRes.data,
@@ -122,7 +124,10 @@ export function useToggleCampeonatoStatus() {
     mutationFn: async (id: string | number) => {
       await api.patch(`/Campeonato/${id}/alternar-status`);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["campeonatos"] }),
+    onSuccess: (_d, id) => {
+      qc.invalidateQueries({ queryKey: ["campeonatos"] });
+      qc.invalidateQueries({ queryKey: ["campeonato", id] });
+    },
   });
 }
 
@@ -202,8 +207,11 @@ export function useCreateTime() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: TimeFormData) => {
-      const res = await api.post("/Time", data);
-      return res.data;
+      const res = await api.post<{ id?: number; timeId?: number }>("/Time", data);
+      const body = res.data;
+      const id = body.id ?? body.timeId;
+      if (id == null) throw new Error("Resposta da API sem id do time.");
+      return { id };
     },
     onSuccess: (time) => {
       qc.invalidateQueries({ queryKey: ["meus-times"] });

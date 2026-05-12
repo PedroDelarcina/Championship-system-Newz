@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, X } from "lucide-react";
+import { Pencil, Plus, Trash2, X, Power } from "lucide-react";
 import {
   useCampeonatos,
   useCreateCampeonato,
@@ -112,6 +112,9 @@ function AdminCampeonatosPage() {
                     Tipo
                   </th>
                   <th className="text-left p-4 uppercase tracking-widest text-xs text-muted-foreground font-bold">
+                    Ativo (admin)
+                  </th>
+                  <th className="text-left p-4 uppercase tracking-widest text-xs text-muted-foreground font-bold">
                     Status
                   </th>
                   <th className="text-left p-4 uppercase tracking-widest text-xs text-muted-foreground font-bold">
@@ -126,7 +129,7 @@ function AdminCampeonatosPage() {
                 {data.length === 0 && (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={6}
                       className="p-8 text-center text-muted-foreground uppercase tracking-wider text-xs"
                     >
                       Nenhum campeonato cadastrado.
@@ -141,6 +144,9 @@ function AdminCampeonatosPage() {
                     <td className="p-4 font-bold">{c.nome}</td>
                     <td className="p-4 text-muted-foreground">
                       {c.tipo}
+                    </td>
+                    <td className="p-4 text-muted-foreground tabular-nums">
+                      {c.isAtivo ? "Sim" : "Não"}
                     </td>
                     <td className="p-4">
                       <StatusBadge status={c.status} />
@@ -163,7 +169,7 @@ function AdminCampeonatosPage() {
                           aria-label="Alternar status"
                           title="Alternar status"
                         >
-                          <Plus className="size-4" />
+                          <Power className="size-4" />
                         </button>
                         <button
                           onClick={() => handleEdit(c)}

@@ -19,7 +19,9 @@ function safeFormat(d?: string) {
 export function CampeonatoCard({ c }: { c: Campeonato }) {
   const kind = statusCampeonatoKind(c.status);
   const borderColor =
-    kind === "open"
+    kind === "disabled"
+      ? "border-l-destructive/60"
+      : kind === "open"
       ? "border-l-status-open"
       : kind === "running"
         ? "border-l-blood-bright"
@@ -33,6 +35,7 @@ export function CampeonatoCard({ c }: { c: Campeonato }) {
         "group cyber-cut-br bg-obsidian-light border-l-4 flex flex-col relative overflow-hidden transition-transform duration-300 hover:-translate-y-1",
         borderColor,
         kind === "finished" && "opacity-80 hover:opacity-100",
+        kind === "disabled" && "opacity-70 hover:opacity-90",
       )}
     >
       <div className="h-44 bg-obsidian relative">
@@ -50,11 +53,13 @@ export function CampeonatoCard({ c }: { c: Campeonato }) {
           <p
             className={cn(
               "font-bold tracking-widest uppercase text-xs mb-2",
-              kind === "open"
-                ? "text-status-open"
-                : kind === "running"
-                  ? "text-blood-bright"
-                  : "text-muted-foreground",
+              kind === "disabled"
+                ? "text-destructive"
+                : kind === "open"
+                  ? "text-status-open"
+                  : kind === "running"
+                    ? "text-blood-bright"
+                    : "text-muted-foreground",
             )}
           >
             {c.tipo}
@@ -91,6 +96,7 @@ export function CampeonatoCard({ c }: { c: Campeonato }) {
           params={{ id: String(c.id) }}
           className={cn(
             "cyber-cut w-full bg-obsidian-border text-white font-bold uppercase tracking-widest py-3 text-sm text-center transition-colors",
+            kind === "disabled" && "group-hover:bg-destructive/30",
             kind === "open" && "group-hover:bg-status-open group-hover:text-obsidian",
             kind === "running" &&
               "group-hover:bg-blood-bright group-hover:text-white",

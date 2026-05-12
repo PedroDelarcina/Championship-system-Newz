@@ -1,12 +1,22 @@
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth-store";
 
+const defaultApiBase = "http://localhost:7180/api";
+
+declare module "axios" {
+  export interface AxiosRequestConfig {
+    /** Não envia Authorization (rotas públicas mesmo com token inválido no store). */
+    skipAuth?: boolean;
+  }
+}
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://localhost:7180/api",
+  baseURL: import.meta.env.VITE_API_URL || defaultApiBase,
   headers: { "Content-Type": "application/json" },
 });
 
 api.interceptors.request.use((config) => {
+  if (config.skipAuth) return config;
   const token = useAuthStore.getState().token;
   if (token) {
     config.headers = config.headers ?? {};
@@ -40,7 +50,7 @@ export function getApiErrorMessage(err: unknown): string {
     }
     if (err.message === "Network Error") {
       return "Não foi possível conectar à API. Verifique se o backend C# está rodando em " +
-        (import.meta.env.VITE_API_URL || "https://localhost:7180/api");
+        (import.meta.env.VITE_API_URL || defaultApiBase);
     }
     return err.message;
   }

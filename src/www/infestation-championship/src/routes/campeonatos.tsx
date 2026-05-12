@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { useCampeonatos } from "@/hooks/api";
 import { CampeonatoCard } from "@/components/campeonato-card";
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/campeonatos")({
       },
     ],
   }),
-  component: CampeonatosPage,
+  component: CampeonatosLayout,
 });
 
 type Filtro = "todos" | "open" | "running" | "finished";
@@ -36,7 +36,19 @@ const FILTROS: { value: Filtro; label: string }[] = [
   { value: "finished", label: "Finalizados" },
 ];
 
-function CampeonatosPage() {
+function CampeonatosLayout() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isLista =
+    pathname === "/campeonatos" || pathname === "/campeonatos/";
+
+  if (!isLista) {
+    return <Outlet />;
+  }
+
+  return <CampeonatosLista />;
+}
+
+function CampeonatosLista() {
   const [filtro, setFiltro] = useState<Filtro>("todos");
   const { data, isLoading, error } = useCampeonatos();
 

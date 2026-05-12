@@ -37,6 +37,7 @@ export type StatusCampeonato =
   | "NaoIniciado"
   | "EmAndamento"
   | "Finalizado"
+  | "Desativado"
   | string;
 
 export interface CampeonatoResponseDto {
@@ -114,6 +115,7 @@ export interface InscricaoListDto {
   campeonatoDataInicio: string;
   timeNome: string;
   timeTag: string;
+  timeId: number;
   totalJogadores: number;
 }
 

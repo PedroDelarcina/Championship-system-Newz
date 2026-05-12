@@ -75,6 +75,7 @@ namespace API.Controllers
         /// Criar um novo time
         /// </summary>
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CriarTime([FromBody] TimeRequestDto timeRequestDto, CancellationToken cancellationToken)
         {
             try
@@ -84,7 +85,11 @@ namespace API.Controllers
                 var timeId = await _timeService.CriarTimeAsync(timeRequestDto, userId, cancellationToken);
 
 
-                return Ok(new { message = "Time criado com sucesso", timeId});
+                return Ok(new { message = "Time criado com sucesso", id = timeId });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {

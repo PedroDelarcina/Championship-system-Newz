@@ -46,6 +46,7 @@ namespace API.Service
                 CampeonatoDataInicio = i.Campeonato?.DataInicio ?? DateTime.MinValue,
                 TimeNome = i.Time?.Nome ?? "Time não encontrado",
                 TimeTag = i.Time?.Clantag ?? string.Empty,
+                TimeId = i.TimeId,
                 TotalJogadores = i.Time?.Players.Count ?? 0
             });
         }
@@ -109,6 +110,7 @@ namespace API.Service
                 CampeonatoDataInicio = i.Campeonato?.DataInicio ?? DateTime.MinValue,
                 TimeNome = i.Time?.Nome ?? "Time não encontrado",
                 TimeTag = i.Time?.Clantag ?? string.Empty,
+                TimeId = i.TimeId,
                 TotalJogadores = i.Time?.Players.Count ?? 0
             }); 
         }
@@ -126,6 +128,7 @@ namespace API.Service
                 CampeonatoDataInicio = i.Campeonato?.DataInicio ?? DateTime.MinValue,
                 TimeNome = i.Time?.Nome ?? "Time não encontrado",
                 TimeTag = i.Time?.Clantag ?? string.Empty,
+                TimeId = i.TimeId,
                 TotalJogadores = i.Time?.Players.Count ?? 0
             });
         }

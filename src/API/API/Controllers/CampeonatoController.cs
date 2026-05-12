@@ -36,6 +36,18 @@ namespace API.Controllers
         }
 
         /// <summary>
+        /// Lista os campeonatos ativos (público). Deve vir antes de {id} para não capturar "Ativos" como id.
+        /// </summary>
+        [HttpGet("Ativos")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ObterCampeonatosAtivos (CancellationToken cancellationToken)
+        {
+            var result = await _campeonatoService.ObterCampeonatosAtivosAsync(cancellationToken);
+
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Buscar campeonato por ID (público)
         /// </summary>
         [HttpGet("{id}")]
@@ -47,18 +59,6 @@ namespace API.Controllers
             {
                 return NotFound(new { message = "Campeonato não encontrado" });
             }
-
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Lista os campeonatos ativos (público)
-        /// </summary>
-        [HttpGet("Ativos")]
-        [AllowAnonymous]
-        public async Task<IActionResult> ObterCampeonatosAtivos (CancellationToken cancellationToken)
-        {
-            var result = await _campeonatoService.ObterCampeonatosAtivosAsync(cancellationToken);
 
             return Ok(result);
         }

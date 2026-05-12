@@ -25,7 +25,10 @@ function HomePage() {
   const { data, isLoading, error } = useCampeonatos();
   const ativos =
     data?.filter(
-      (c) => c.status != null && statusCampeonatoKind(c.status) !== "finished"
+      (c) =>
+        c.status != null &&
+        statusCampeonatoKind(c.status) !== "finished" &&
+        statusCampeonatoKind(c.status) !== "disabled",
     ) ?? [];
 
   return (
