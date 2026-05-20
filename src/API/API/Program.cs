@@ -104,9 +104,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Em Development o front usa http://localhost:7180/api; com dois listen URLs (perfil https)
-// o redirecionamento quebraria as chamadas. Em Production (ex.: Docker só HTTP) o middleware
-// não redireciona se não houver HTTPS configurado.
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
