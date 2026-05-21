@@ -114,7 +114,8 @@ jobs:
             docker compose -f src/docker-compose-vps.yml down
 
             echo "=== Inicializando Compose ==="
-            docker compose -f src/docker-compose-vps.yml up -d --remove-orphans --build
+            docker compose -f src/docker-compose-vps.yml --build --no-cache
+            docker compose -f src/docker-compose-vps.yml up -d --remove-orphans
 
             echo "=== Aguardando container inicializar ==="
             sleep 5
