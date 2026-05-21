@@ -11,7 +11,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 7181
-      VITE_API_URL: http://backend-championship:7180/api
+      VITE_API_URL: http://localhost:7180/api
     #depends_on:
     #  - api
     networks:
@@ -28,6 +28,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:7180
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ChampionshipDB;User Id=sa;Password=DOw0zZKiq75B;TrustServerCertificate=True;Encrypt=False;
+      - Jwt__Key=x+bj5OC/oYLGxbDy1k8MK5GzpCwsQ/XUsaim+Ojpu9I=
+      - Jwt__Issuer=http://localhost:7180
+      - Jwt__Audience=http://localhost:7180
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -43,7 +46,7 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - sqlserver_data:/var/opt/mssql
+      - sqlserver_data1:/var/opt/mssql
     healthcheck:
       test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "DOw0zZKiq75B", "-C", "-Q", "SELECT 1"]
       interval: 3s
@@ -57,4 +60,4 @@ networks:
     driver: bridge
 
 volumes:
-  sqlserver_data:
+  sqlserver_data1:
