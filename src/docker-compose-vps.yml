@@ -26,7 +26,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:7180
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ChampionshipDB;User Id=sa;Password=DOw0zZKiq75B;
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ChampionshipDB;User Id=sa;Password=DOw0zZKiq75B;TrustServerCertificate=True;Encrypt=False;
     #depends_on:
     #  sqlserver:
     #    condition: service_healthy
