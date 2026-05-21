@@ -27,7 +27,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:7180
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ChampionshipDB;User Id=sa;Password=DOw0zZKiq75B;TrustServerCertificate=True;Encrypt=False;
+      - ConnectionStrings__DefaultConnection=Server=91.108.124.80;Database=ChampionshipDB;User Id=sa;Password=DOw0zZKiq75B;TrustServerCertificate=True;Encrypt=False;
       - Jwt__Key=x+bj5OC/oYLGxbDy1k8MK5GzpCwsQ/XUsaim+Ojpu9I=
       - Jwt__Issuer=http://91.108.124.80:7180
       - Jwt__Audience=http://91.108.124.80:7180
