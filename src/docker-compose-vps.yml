@@ -43,6 +43,7 @@ services:
     environment:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: DOw0zZKiq75B
+      MSSQL_SA_PASSWORD: DOw0zZKiq75B
     ports:
       - "1433:1433"
     volumes:
