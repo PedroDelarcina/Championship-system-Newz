@@ -1,7 +1,7 @@
 name: infestation-championship
 
 services:
-  front-championship:
+  frontchamp:
     build:
       context: ./www/infestation-championship
       dockerfile: Dockerfile
@@ -11,13 +11,13 @@ services:
     environment:
       NODE_ENV: development
       PORT: 7181
-      VITE_API_URL: http://backend-championship:7180/api
+      VITE_API_URL: http://backchamp:7180/api
     #depends_on:
     #  - api
     networks:
       - infestation-network
 
-  backend-championship:
+  backchamp:
     build:
       context: ./API
       dockerfile: Dockerfile

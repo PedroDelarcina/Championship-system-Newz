@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth-store";
 
-const defaultApiBase = import.meta.env.API_URL || "http://localhost:7180/api";
+const defaultApiBase = import.meta.env.VITE_API_URL || "http://localhost:7180/api";
 
 declare module "axios" {
   export interface AxiosRequestConfig {
