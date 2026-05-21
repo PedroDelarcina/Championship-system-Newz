@@ -11,7 +11,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 7181
-      VITE_API_URL: http://infestation-championship-backchamp:7180/api
+      VITE_API_URL: http://91.108.124.80:7180/api
     #depends_on:
     #  - api
     networks:
@@ -29,8 +29,8 @@ services:
       - ASPNETCORE_URLS=http://+:7180
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ChampionshipDB;User Id=sa;Password=DOw0zZKiq75B;TrustServerCertificate=True;Encrypt=False;
       - Jwt__Key=x+bj5OC/oYLGxbDy1k8MK5GzpCwsQ/XUsaim+Ojpu9I=
-      - Jwt__Issuer=http://localhost:7180
-      - Jwt__Audience=http://localhost:7180
+      - Jwt__Issuer=http://91.108.124.80:7180
+      - Jwt__Audience=http://91.108.124.80:7180
     depends_on:
       sqlserver:
         condition: service_healthy
