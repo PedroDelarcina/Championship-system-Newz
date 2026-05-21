@@ -11,7 +11,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 7181
-      VITE_API_URL: http://localhost:7180/api
+      VITE_API_URL: http://backchamp:7180/api
     #depends_on:
     #  - api
     networks:
