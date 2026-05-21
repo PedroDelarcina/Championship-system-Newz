@@ -1,0 +1,59 @@
+name: infestation-championship
+
+services:
+  frontend:
+    build:
+      context: ./www/infestation-championship
+      dockerfile: Dockerfile
+    container_name: front-championship
+    ports:
+      - "7181:7181"
+    environment:
+      NODE_ENV: development
+      PORT: 7181
+    depends_on:
+      - api
+    networks:
+      - infestation-network
+
+  api:
+    build:
+      context: ./API
+      dockerfile: Dockerfile
+    container_name: backend-championship
+    ports:
+      - "7180:7180"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:7180
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ChampionshipDB;User Id=sa;Password=${SQLSERVER_PASSWORD};
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - infestation-network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: ${SQLSERVER_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${SQLSERVER_PASSWORD}", "-C", "-Q", "SELECT 1"]
+      interval: 3s
+      timeout: 5s
+      retries: 3
+    networks:
+      - infestation-network
+
+networks:
+  infestation-network:
+    driver: bridge
+
+volumes:
+  sqlserver_data:

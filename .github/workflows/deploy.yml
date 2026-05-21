@@ -1,0 +1,138 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - teste_vps
+
+env:
+  DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+  DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+  DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT || 22 }}
+  DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+  DEPLOY_SSH_PASS: ${{ secrets.DEPLOY_SSH_PASS }}
+  CONTAINER_FRONT: 'front-championship'
+  CONTAINER_BACKEND: 'backend-championship'
+  IMAGE_FRONT: 'front-infestation/championship:latest'
+  IMAGE_BACKEND: 'back-infestation/championship:latest'
+  GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  deploy:
+    name: Deploy Front + Backend to VPS
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🧪 Test SSH connection
+        uses: appleboy/ssh-action@v0.1.9
+        with:
+          host: ${{ env.DEPLOY_HOST }}
+          username: ${{ env.DEPLOY_USER }}
+          port: ${{ env.DEPLOY_SSH_PORT }}
+          key: ${{ env.DEPLOY_SSH_KEY }}
+          passphrase: ${{ env.DEPLOY_SSH_PASS }}
+          script: |
+            echo "✅ SSH connection successful"
+
+      - name: 📦 Install dependencies on VPS
+        uses: appleboy/ssh-action@v0.1.9
+        with:
+          host: ${{ env.DEPLOY_HOST }}
+          username: ${{ env.DEPLOY_USER }}
+          port: ${{ env.DEPLOY_SSH_PORT }}
+          key: ${{ env.DEPLOY_SSH_KEY }}
+          passphrase: ${{ env.DEPLOY_SSH_PASS }}
+          script: |
+            # Update package list
+            sudo apt-get update
+
+            # Install Docker if not present
+            if ! command -v docker &> /dev/null; then
+              echo "Installing Docker..."
+              curl -fsSL https://get.docker.com -o get-docker.sh
+              sudo sh get-docker.sh
+              sudo usermod -aG docker $USER
+            fi
+
+            # Install Docker Compose if not present
+            if ! command -v docker-compose &> /dev/null; then
+              echo "Installing Docker Compose..."
+              sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+            fi
+
+            # Install Git if not present
+            if ! command -v git &> /dev/null; then
+              echo "Installing Git..."
+              sudo apt-get install -y git
+            fi
+
+            echo "✅ All dependencies are installed"
+            
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v0.1.9
+        env:
+          GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          host: ${{ env.DEPLOY_HOST }}
+          username: ${{ env.DEPLOY_USER }}
+          port: ${{ env.DEPLOY_SSH_PORT }}
+          key: ${{ env.DEPLOY_SSH_KEY }}
+          passphrase: ${{ env.DEPLOY_SSH_PASS }}
+          envs: GIT_TOKEN
+          script: |
+            # Run deployment script
+            APP_DIR="/opt/infestation"
+            REPO_URL="https://x-access-token:${GIT_TOKEN}@github.com/${{ github.repository }}.git"
+            BRANCH="${{ github.ref_name }}"
+
+            # Create directory if it doesn't exist
+            sudo mkdir -p "$APP_DIR"
+            sudo chown -R $USER:$USER "$APP_DIR"
+            cd "$APP_DIR"
+
+            # Clone or update repository
+            if [ -d ".git" ]; then
+              echo "📥 Updating repository..."
+              git remote set-url origin "$REPO_URL"
+              git fetch origin
+              git reset --hard origin/$BRANCH
+              git pull origin $BRANCH
+            else
+              echo "📥 Cloning repository..."
+              cd ..
+              sudo rm -rf "$APP_DIR"
+              git clone -b $BRANCH "$REPO_URL" "$APP_DIR"
+              cd "$APP_DIR"
+            fi
+
+            echo "=== Removendo Compose ==="
+            docker compose -f docker-compose-vps.yml down
+
+            echo "=== Inicializando Compose ==="
+            docker compose -f docker-compose-vps.yml up -d --remove-orphans --build
+
+            echo "=== Aguardando container inicializar ==="
+            sleep 5
+
+            echo "=== Status do container ==="
+            docker ps -a | grep ${{ env.CONTAINER_BACKEND }}
+
+            echo "=== Logs do container ==="
+            docker logs --tail 50 ${{ env.CONTAINER_BACKEND }}
+
+            echo "=== Deploy concluído com sucesso! ==="
+
+      - name: 📢 Deployment summary
+        if: success()
+        run: |
+          echo "### 🎉 Deployment Successful!" >> $GITHUB_STEP_SUMMARY
+
+      - name: 📢 Deployment failed
+        if: failure()
+        run: |
+          echo "### ❌ Deployment Failed!" >> $GITHUB_STEP_SUMMARY
