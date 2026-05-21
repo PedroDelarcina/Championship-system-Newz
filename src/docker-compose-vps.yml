@@ -1,7 +1,7 @@
 name: infestation-championship
 
 services:
-  frontend:
+  front-championship:
     build:
       context: ./www/infestation-championship
       dockerfile: Dockerfile
@@ -17,7 +17,7 @@ services:
     networks:
       - infestation-network
 
-  api:
+  backend-championship:
     build:
       context: ./API
       dockerfile: Dockerfile
