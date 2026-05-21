@@ -26,7 +26,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:7180
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ChampionshipDB;User Id=sa;Password=DOw0zZKiq75B;
+      - ConnectionStrings__DefaultConnection=DataSource=sqlserver;Database=ChampionshipDB;User Id=sa;Password=DOw0zZKiq75B;
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -43,11 +43,11 @@ services:
       - "1433:1433"
     volumes:
       - sqlserver_data:/var/opt/mssql
-    healthcheck:
-      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "DOw0zZKiq75B", "-C", "-Q", "SELECT 1"]
-      interval: 3s
-      timeout: 5s
-      retries: 3
+    #healthcheck:
+    #  test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "DOw0zZKiq75B", "-C", "-Q", "SELECT 1"]
+    #  interval: 3s
+    #  timeout: 5s
+    #  retries: 3
     networks:
       - infestation-network
 
