@@ -7,10 +7,11 @@ services:
       dockerfile: Dockerfile
     container_name: front-championship
     ports:
-      - "8080:8080"
+      - "7181:7181"
     environment:
       NODE_ENV: development
-      PORT: 8080
+      PORT: 7181
+      VITE_API_URL: http://backend-championship:7180/api
     #depends_on:
     #  - api
     networks:
