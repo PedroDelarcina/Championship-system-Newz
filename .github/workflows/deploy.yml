@@ -111,10 +111,10 @@ jobs:
             fi
 
             echo "=== Removendo Compose ==="
-            docker compose -f docker-compose-vps.yml down
+            docker compose -f src/docker-compose-vps.yml down
 
             echo "=== Inicializando Compose ==="
-            docker compose -f docker-compose-vps.yml up -d --remove-orphans --build
+            docker compose -f src/docker-compose-vps.yml up -d --remove-orphans --build
 
             echo "=== Aguardando container inicializar ==="
             sleep 5
