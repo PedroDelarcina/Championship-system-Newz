@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,11 +13,15 @@ namespace Infrastructure.Data
     {
         private readonly IConfiguration _configuration;
         private readonly string _connectionString;
+        private readonly ILogger _logger;
 
-        public AppDbContext(IConfiguration configuration)
+        public AppDbContext(
+            IConfiguration configuration,
+            ILogger logger)
         {
             _configuration = configuration;
             _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _logger = logger;
         }
 
         public DbSet<Campeonato> Campeonatos { get; set; }
@@ -26,13 +31,14 @@ namespace Infrastructure.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            _logger.LogInformation("Configuring database context with connection string: {ConnectionString}", _connectionString);
             optionsBuilder.UseSqlServer(_connectionString);
             base.OnConfiguring(optionsBuilder);
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-
+            _logger.LogInformation("OnModelCreating");
             base.OnModelCreating(builder);
 
             builder.Entity<PlayerTime>(entity =>

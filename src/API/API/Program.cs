@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using Serilog;
 using System.Text;
 using System.Text.Json;
 
@@ -17,21 +18,28 @@ using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
+Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .Enrich.FromLogContext()
+                .CreateLogger();
+builder.Host.UseSerilog();
 
-
+Log.Logger.Information("Starting API...");
 builder.Services.AddDbContext<AppDbContext>();
 
-
+Log.Logger.Information("Configure Identity...");
 builder.Services.AddIdentity<Usuario, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
 
 //Config JWT
+Log.Logger.Information("Configure JWT...");
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 
 //registrar Services
+Log.Logger.Information("Configure Services...");
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<ICampeonatoService, CampeonatoService>();
 builder.Services.AddScoped<ITimeService, TimeService>();
@@ -39,12 +47,14 @@ builder.Services.AddScoped<IInscricaoService, InscricaoService>();
 
 
 //registrar Repositories
+Log.Logger.Information("Configure Repositories...");
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<ICampeonatoRepository, CampeonatoRepository>();
 builder.Services.AddScoped<ITimeRepository, TimeRepository>();
 builder.Services.AddScoped<IInscricaoRepository, InscricaoRepository>();
 
 
+Log.Logger.Information("Configure Controllers...");
 builder.Services.AddControllers()
     .AddJsonOptions(o =>
     {
@@ -56,6 +66,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddOpenApi();
 
+Log.Logger.Information("Configure CORS...");
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -122,4 +133,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+Log.Logger.Information("Running API...");
 app.Run();
