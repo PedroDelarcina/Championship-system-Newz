@@ -11,8 +11,8 @@ services:
     environment:
       NODE_ENV: development
       PORT: 7181
-    depends_on:
-      - api
+    #depends_on:
+    #  - api
     networks:
       - infestation-network
 
@@ -26,10 +26,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:7180
-      - ConnectionStrings__DefaultConnection=DataSource=sqlserver;Database=ChampionshipDB;User Id=sa;Password=DOw0zZKiq75B;
-    depends_on:
-      sqlserver:
-        condition: service_healthy
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ChampionshipDB;User Id=sa;Password=DOw0zZKiq75B;
+    #depends_on:
+    #  sqlserver:
+    #    condition: service_healthy
     networks:
       - infestation-network
 
