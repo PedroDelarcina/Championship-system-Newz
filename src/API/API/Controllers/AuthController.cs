@@ -1,9 +1,11 @@
 ﻿using API.Service;
 using Core.DTOs.Auth;
 using Core.Entities;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -15,17 +17,20 @@ namespace API.Controllers
         private readonly SignInManager<Usuario> _signInManager;
         private readonly TokenService _tokenService;
         private readonly ILogger<AuthController> _logger;
+        private readonly AppDbContext _dbContext;
 
         public AuthController(
             SignInManager<Usuario> signInManager,
             UserManager<Usuario> userManager,
             TokenService tokenService,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,
+            AppDbContext dbContext)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _tokenService = tokenService;
             _logger = logger;
+            _dbContext = dbContext;
         }
 
 
@@ -173,6 +178,15 @@ namespace API.Controllers
                 _logger.LogError(ex, "Erro ao obter usuário logado");
                 return StatusCode(500, new { message = "Ocorreu um erro ao obter o usuário logado" });
             }
+        }
+
+        [AllowAnonymous]
+        [Obsolete]
+        [HttpGet("migrate")]
+        public async Task<IActionResult> MigrateDatabase()
+        {
+            _dbContext.Database.Migrate();
+            return Ok("Migração concluída com sucesso");
         }
     }
 }

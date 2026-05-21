@@ -58,6 +58,7 @@ services:
 networks:
   infestation-network:
     driver: bridge
+    external: true
 
 volumes:
   sqlserver_data1:

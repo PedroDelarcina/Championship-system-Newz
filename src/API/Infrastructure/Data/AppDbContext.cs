@@ -1,6 +1,7 @@
 ﻿using Core.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,14 +10,25 @@ namespace Infrastructure.Data
 {
     public class AppDbContext : IdentityDbContext<Usuario>
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        private readonly IConfiguration _configuration;
+        private readonly string _connectionString;
+
+        public AppDbContext(IConfiguration configuration)
         {
+            _configuration = configuration;
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
         public DbSet<Campeonato> Campeonatos { get; set; }
         public DbSet<Time> Times { get; set; }
         public DbSet<Inscricao> Inscricoes { get; set; }
         public DbSet<PlayerTime> PlayerTimes { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlServer(_connectionString);
+            base.OnConfiguring(optionsBuilder);
+        }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
