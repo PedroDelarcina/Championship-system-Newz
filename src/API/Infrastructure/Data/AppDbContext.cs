@@ -11,17 +11,10 @@ namespace Infrastructure.Data
 {
     public class AppDbContext : IdentityDbContext<Usuario>
     {
-        private readonly IConfiguration _configuration;
-        private readonly string _connectionString;
-        private readonly ILogger _logger;
 
-        public AppDbContext(
-            IConfiguration configuration,
-            ILogger logger)
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
-            _configuration = configuration;
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
-            _logger = logger;
+            
         }
 
         public DbSet<Campeonato> Campeonatos { get; set; }
@@ -29,16 +22,16 @@ namespace Infrastructure.Data
         public DbSet<Inscricao> Inscricoes { get; set; }
         public DbSet<PlayerTime> PlayerTimes { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+      /*  protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             _logger.LogInformation("Configuring database context with connection string: {ConnectionString}", _connectionString);
             optionsBuilder.UseSqlServer(_connectionString);
             base.OnConfiguring(optionsBuilder);
-        }
+        } */
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            _logger.LogInformation("OnModelCreating");
+           // _logger.LogInformation("OnModelCreating");
             base.OnModelCreating(builder);
 
             builder.Entity<PlayerTime>(entity =>

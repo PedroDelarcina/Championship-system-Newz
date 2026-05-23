@@ -24,8 +24,8 @@ Log.Logger = new LoggerConfiguration()
                 .CreateLogger();
 builder.Host.UseSerilog();
 
-Log.Logger.Information("Starting API...");
-builder.Services.AddDbContext<AppDbContext>();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 Log.Logger.Information("Configure Identity...");
 builder.Services.AddIdentity<Usuario, IdentityRole>()
