@@ -1,0 +1,13 @@
+ASPNETCORE_ENVIRONMENT=Production
+ASPNETCORE_URLS=http://+:7180
+
+SQLSERVER_PASSWORD=Tournament@2026
+
+VITE_API_URL=http://localhost:7180/api
+
+
+ConnectionStrings__DefaultConnection=Server=sqlserver;Database=InfestationTournament;User Id=sa;Password=Tournament@2026;TrustServerCertificate=True;Encrypt=True
+Jwt__Key=x+bj5OC/oYLGxbDy1k8MK5GzpCwsQ/XUsaim+Ojpu9I=
+Jwt__Issuer=InfestationTournamentAPI
+Jwt__Audience=InfestationTournamentApp
+Extra__TokenExpirationTime=4
