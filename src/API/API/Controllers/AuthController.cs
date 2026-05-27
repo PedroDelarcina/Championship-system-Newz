@@ -40,8 +40,6 @@ namespace API.Controllers
 
 
 
-     //REFATORAR ISSO AQUI INTEIRO
-
         [HttpPost("Registro")]
         [AllowAnonymous]
         public async Task<IActionResult> Registro([FromBody] RegistroDto registroDto)
