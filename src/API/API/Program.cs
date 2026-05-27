@@ -44,6 +44,7 @@ builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<ICampeonatoService, CampeonatoService>();
 builder.Services.AddScoped<ITimeService, TimeService>();
 builder.Services.AddScoped<IInscricaoService, InscricaoService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 //registrar Repositories
@@ -72,11 +73,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins(
-                "*",
-                "http://localhost:8080")
+                "*")
               .AllowAnyHeader()
-              .AllowAnyMethod();
-             // .AllowAnyOrigin();
+              .AllowAnyMethod()
+              .AllowAnyOrigin();
         //  .AllowCredentials();
     });
 });

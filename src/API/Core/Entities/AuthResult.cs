@@ -1,0 +1,22 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Core.Entities
+{
+    public class AuthResult<T>
+    {
+        public bool Success { get; set; }
+        public string? Message { get; set; }
+        public T? Data { get; set; }
+        public IEnumerable<string>? Errors { get; set; }
+        public static AuthResult<T> SuccessResult(T data, string? message = null)
+        {
+            return new AuthResult<T> { Success = true, Data = data, Message = message };
+        }
+        public static AuthResult<T> FailureResult(string message, IEnumerable<string>? errors = null)
+        {
+            return new AuthResult<T> { Success = false, Message = message };
+        }
+    }
+}
