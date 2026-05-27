@@ -1,9 +1,12 @@
 ﻿using API.Service;
 using Core.DTOs.Auth;
 using Core.Entities;
+using Core.Interfaces.Services;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -11,26 +14,31 @@ namespace API.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
+
         private readonly UserManager<Usuario> _userManager;
         private readonly SignInManager<Usuario> _signInManager;
         private readonly TokenService _tokenService;
+        private readonly IAuthService _authService;
         private readonly ILogger<AuthController> _logger;
+        private readonly AppDbContext _dbContext;
 
         public AuthController(
             SignInManager<Usuario> signInManager,
             UserManager<Usuario> userManager,
+            IAuthService authService,
             TokenService tokenService,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,
+            AppDbContext dbContext)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _tokenService = tokenService;
+            _authService = authService;
             _logger = logger;
+            _dbContext = dbContext;
         }
 
 
-
-     //REFATORAR ISSO AQUI INTEIRO
 
         [HttpPost("Registro")]
         [AllowAnonymous]
@@ -38,58 +46,13 @@ namespace API.Controllers
         {
             try
             {
-                var existingUser = await _userManager.FindByEmailAsync(registroDto.Email);
-                if (existingUser != null)
+                var result = await _authService.RegistroAsync(registroDto);
+                if (!result.Success)
                 {
-                    return BadRequest(new { message = "Email já cadastrado" });
+                    return BadRequest(new { message = result.Message, errors = result.Errors });
                 }
 
-                var existingUserName = _userManager.Users.Any(u => u.NickName == registroDto.Nickname);
-                if (existingUserName)
-                {
-                    return BadRequest(new { message = "Nickname já cadastrado" });
-                }
-
-
-                var user = new Usuario
-                {
-                    UserName = registroDto.Email,
-                    Email = registroDto.Email,
-                    NickName = registroDto.Nickname,
-                    DataRegistro = DateTime.UtcNow,
-                    IsAdmin = false
-                };
-
-                var result = await _userManager.CreateAsync(user, registroDto.Password);
-
-                if (!result.Succeeded)
-                {
-                    var erros = result.Errors.Select(e => e.Description);
-                    return BadRequest(new { message = "Erro ao criar usuário", erros });
-                }
-
-               var roleResult =  await _userManager.AddToRoleAsync(user, "User");
-
-                if (!roleResult.Succeeded)
-                {
-                    var erros = roleResult.Errors.Select(e => e.Description);
-                    return BadRequest(new { message = "Erro ao adicionar usuário à role", erros });
-                }
-
-                _logger.LogInformation($"Novo usuário registrado: {user.Email}");
-
-                return Ok(new
-                {
-                    message = "Usuário registrado com sucesso",
-                    user = new UsuarioResponseDto
-                    {
-                        Id = user.Id,
-                        Email = user.Email,
-                        NickName = user.NickName,
-                        IsAdmin = user.IsAdmin,
-                        DataRegistro = user.DataRegistro
-                    }
-                });
+                return Ok(new { message = "Usuário registrado com sucesso" });
             }
             catch (Exception ex)
             {
@@ -105,32 +68,13 @@ namespace API.Controllers
         {
             try
             {
-                var user = await _userManager.FindByEmailAsync(loginDto.Email);
-                if (user == null)
+                var result = await _authService.LoginAsync(loginDto, cancellationToken);
+                if (!result.Success)
                 {
-                    return Unauthorized(new { message = "Email ou senha inválidos" });
+                    return Unauthorized(new { message = result.Message });
                 }
 
-                var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
-
-                if (!result.Succeeded)
-                {
-                    return Unauthorized(new { message = "Senha Inválida" });
-                }
-
-                var token = _tokenService.GenerateUserToken(user, cancellationToken);
-
-                _logger.LogInformation($"Usuário logado: {user.Email}");
-
-                return Ok(new TokenResponseDto
-                {
-                    Token = token.Token,
-                    Expiration = token.GenerateAt.AddHours(4),
-                    UserId = user.Id,
-                    Email = user.Email ?? string.Empty,
-                    Nickname = user.NickName,
-                    IsAdmin = user.IsAdmin
-                });
+                return Ok(result.Data);
 
             }
             catch (Exception ex)
@@ -147,25 +91,18 @@ namespace API.Controllers
             try
             {
                 var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userId))
+
+                var result = await _authService.UsuarioLogadoAsync(userId ?? string.Empty);
+
+                if (!result.Success)
                 {
-                    return Unauthorized(new { message = "Usuário não autenticado" });
+                    if (result.Message == "Usuário não autenticado")
+                        return Unauthorized(new { message = result.Message });
+
+                    return NotFound(new { message = result.Message });
                 }
 
-                var user = await _userManager.FindByIdAsync(userId);
-                if (user == null)
-                {
-                    return NotFound(new { message = "Usuário não encontrado" });
-                }
-
-                return Ok(new UsuarioResponseDto
-                {
-                    Id = user.Id,
-                    Email = user.Email ?? string.Empty,
-                    NickName = user.NickName,
-                    IsAdmin = user.IsAdmin,
-                    DataRegistro = user.DataRegistro
-                });
+                return Ok(result.Data);
 
             }
             catch (Exception ex)
@@ -173,6 +110,15 @@ namespace API.Controllers
                 _logger.LogError(ex, "Erro ao obter usuário logado");
                 return StatusCode(500, new { message = "Ocorreu um erro ao obter o usuário logado" });
             }
+        }
+
+        [AllowAnonymous]
+        [Obsolete]
+        [HttpGet("migrate")]
+        public async Task<IActionResult> MigrateDatabase()
+        {
+            _dbContext.Database.Migrate();
+            return Ok("Migração concluída com sucesso");
         }
     }
 }
