@@ -31,21 +31,7 @@ builder.Services.AddIdentity<Usuario, IdentityRole>()
 //Config JWT
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
-
-//registrar Services
-builder.Services.AddScoped<TokenService>();
-builder.Services.AddScoped<ICampeonatoService, CampeonatoService>();
-builder.Services.AddScoped<ITimeService, TimeService>();
-builder.Services.AddScoped<IInscricaoService, InscricaoService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-
-
-//registrar Repositories
-builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-builder.Services.AddScoped<ICampeonatoRepository, CampeonatoRepository>();
-builder.Services.AddScoped<ITimeRepository, TimeRepository>();
-builder.Services.AddScoped<IInscricaoRepository, InscricaoRepository>();
-
+builder.Services.AddDependencyInjection();
 
 builder.Services.AddControllers()
     .AddJsonOptions(o =>
