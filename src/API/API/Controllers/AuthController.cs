@@ -21,6 +21,7 @@ namespace API.Controllers
         private readonly IAuthService _authService;
         private readonly ILogger<AuthController> _logger;
         private readonly AppDbContext _dbContext;
+        private readonly IEmailService _emailService;
 
         public AuthController(
             SignInManager<Usuario> signInManager,
@@ -28,7 +29,8 @@ namespace API.Controllers
             IAuthService authService,
             TokenService tokenService,
             ILogger<AuthController> logger,
-            AppDbContext dbContext)
+            AppDbContext dbContext,
+            IEmailService emailService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -36,6 +38,7 @@ namespace API.Controllers
             _authService = authService;
             _logger = logger;
             _dbContext = dbContext;
+            _emailService = emailService;
         }
 
 
@@ -110,6 +113,30 @@ namespace API.Controllers
                 _logger.LogError(ex, "Erro ao obter usuário logado");
                 return StatusCode(500, new { message = "Ocorreu um erro ao obter o usuário logado" });
             }
+        }
+
+        [HttpPost("EsqueciSenha")]
+        [AllowAnonymous]
+        public async Task<IActionResult> EsqueciSenha([FromBody] ForgotPasswordDto forgotPasswordDto)
+        {
+            var result = await _authService.EsqueciSenhaAsync(forgotPasswordDto);
+
+            if (!result.Success)
+                return BadRequest(new { message = result.Message });
+
+            return Ok(new { message = result.Message });
+        }
+
+        [HttpPost("ResetarSenha")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetarSenha([FromBody] ResetPasswordDto resetPasswordDto)
+        {
+            var result = await _authService.ResetarSenhaAsync(resetPasswordDto);
+
+            if(!result.Success)
+                return BadRequest(new { message = result.Message, errors = result.Errors });
+
+            return Ok(new { message = result.Message });
         }
 
         [AllowAnonymous]

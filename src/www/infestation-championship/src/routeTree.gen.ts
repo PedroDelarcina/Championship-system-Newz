@@ -9,10 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as MeusTimesRouteImport } from './routes/meus-times'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
 import { Route as CampeonatosRouteImport } from './routes/campeonatos'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MeusTimesNovoRouteImport } from './routes/meus-times.novo'
@@ -21,6 +23,11 @@ import { Route as CampeonatosIdRouteImport } from './routes/campeonatos.$id'
 import { Route as AdminInscricoesRouteImport } from './routes/admin.inscricoes'
 import { Route as AdminCampeonatosRouteImport } from './routes/admin.campeonatos'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -39,6 +46,11 @@ const MeusTimesRoute = MeusTimesRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
+  id: '/esqueci-senha',
+  path: '/esqueci-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CampeonatosRoute = CampeonatosRouteImport.update({
@@ -80,10 +92,12 @@ const AdminCampeonatosRoute = AdminCampeonatosRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/campeonatos': typeof CampeonatosRouteWithChildren
+  '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/meus-times': typeof MeusTimesRouteWithChildren
   '/perfil': typeof PerfilRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/campeonatos': typeof AdminCampeonatosRoute
   '/admin/inscricoes': typeof AdminInscricoesRoute
   '/campeonatos/$id': typeof CampeonatosIdRoute
@@ -93,10 +107,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/campeonatos': typeof CampeonatosRouteWithChildren
+  '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/meus-times': typeof MeusTimesRouteWithChildren
   '/perfil': typeof PerfilRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/campeonatos': typeof AdminCampeonatosRoute
   '/admin/inscricoes': typeof AdminInscricoesRoute
   '/campeonatos/$id': typeof CampeonatosIdRoute
@@ -107,10 +123,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/campeonatos': typeof CampeonatosRouteWithChildren
+  '/esqueci-senha': typeof EsqueciSenhaRoute
   '/login': typeof LoginRoute
   '/meus-times': typeof MeusTimesRouteWithChildren
   '/perfil': typeof PerfilRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin/campeonatos': typeof AdminCampeonatosRoute
   '/admin/inscricoes': typeof AdminInscricoesRoute
   '/campeonatos/$id': typeof CampeonatosIdRoute
@@ -122,10 +140,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/campeonatos'
+    | '/esqueci-senha'
     | '/login'
     | '/meus-times'
     | '/perfil'
     | '/register'
+    | '/reset-password'
     | '/admin/campeonatos'
     | '/admin/inscricoes'
     | '/campeonatos/$id'
@@ -135,10 +155,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/campeonatos'
+    | '/esqueci-senha'
     | '/login'
     | '/meus-times'
     | '/perfil'
     | '/register'
+    | '/reset-password'
     | '/admin/campeonatos'
     | '/admin/inscricoes'
     | '/campeonatos/$id'
@@ -148,10 +170,12 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/campeonatos'
+    | '/esqueci-senha'
     | '/login'
     | '/meus-times'
     | '/perfil'
     | '/register'
+    | '/reset-password'
     | '/admin/campeonatos'
     | '/admin/inscricoes'
     | '/campeonatos/$id'
@@ -162,16 +186,25 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CampeonatosRoute: typeof CampeonatosRouteWithChildren
+  EsqueciSenhaRoute: typeof EsqueciSenhaRoute
   LoginRoute: typeof LoginRoute
   MeusTimesRoute: typeof MeusTimesRouteWithChildren
   PerfilRoute: typeof PerfilRoute
   RegisterRoute: typeof RegisterRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   AdminCampeonatosRoute: typeof AdminCampeonatosRoute
   AdminInscricoesRoute: typeof AdminInscricoesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -198,6 +231,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/esqueci-senha': {
+      id: '/esqueci-senha'
+      path: '/esqueci-senha'
+      fullPath: '/esqueci-senha'
+      preLoaderRoute: typeof EsqueciSenhaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/campeonatos': {
@@ -281,10 +321,12 @@ const MeusTimesRouteWithChildren = MeusTimesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CampeonatosRoute: CampeonatosRouteWithChildren,
+  EsqueciSenhaRoute: EsqueciSenhaRoute,
   LoginRoute: LoginRoute,
   MeusTimesRoute: MeusTimesRouteWithChildren,
   PerfilRoute: PerfilRoute,
   RegisterRoute: RegisterRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   AdminCampeonatosRoute: AdminCampeonatosRoute,
   AdminInscricoesRoute: AdminInscricoesRoute,
 }

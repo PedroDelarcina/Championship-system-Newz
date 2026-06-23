@@ -7,9 +7,12 @@ import type {
   CampeonatoResponseDto,
   InscricaoListDto,
   InscricaoRequestDto,
+  ForgotPasswordDto,
   LoginDto,
+  MessageResponseDto,
   RegistroDto,
   RegistroResponseDto,
+  ResetPasswordDto,
   TimeRequestDto,
   TimeResponseDto,
   TokenResponseDto,
@@ -39,6 +42,32 @@ export function useRegister() {
   return useMutation({
     mutationFn: async (data: RegistroDto) => {
       const res = await api.post<RegistroResponseDto>("/Auth/Registro", data);
+      return res.data;
+    },
+  });
+}
+
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: async (data: ForgotPasswordDto) => {
+      const res = await api.post<MessageResponseDto>(
+        "/Auth/EsqueciSenha",
+        data,
+        { skipAuth: true },
+      );
+      return res.data;
+    },
+  });
+}
+
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: async (data: ResetPasswordDto) => {
+      const res = await api.post<MessageResponseDto>(
+        "/Auth/ResetarSenha",
+        data,
+        { skipAuth: true },
+      );
       return res.data;
     },
   });

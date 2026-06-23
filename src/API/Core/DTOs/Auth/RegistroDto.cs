@@ -24,7 +24,7 @@ namespace Core.DTOs.Auth
         [Required(ErrorMessage = "Nome é obrigatório")]
         [MinLength(3, ErrorMessage = "Nome deve ter no mínimo 3 caracteres")]
         [MaxLength(100, ErrorMessage = "Nome deve ter no máximo 100 caracteres")]
-        public string UserName { get; set; } = string.Empty; 
+        public string Nome { get; set; } = string.Empty; 
 
         [Required(ErrorMessage = "Nickname é obrigatório")]
         [MinLength(3, ErrorMessage = "Nickname deve ter no mínimo 3 caracteres")]

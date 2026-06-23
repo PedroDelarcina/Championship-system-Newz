@@ -23,7 +23,7 @@ export const Route = createFileRoute("/register")({
 
 const schema = z
   .object({
-    userName: z.string().trim().min(3, "Mínimo 3 caracteres").max(100),
+    nome: z.string().trim().min(3, "Mínimo 3 caracteres").max(100),
     nickname: z.string().trim().min(3, "Mínimo 3 caracteres").max(50),
     email: z.string().trim().email("E-mail inválido").max(255),
     password: z.string().min(6, "Mínimo 6 caracteres").max(100),
@@ -47,7 +47,7 @@ function RegisterPage() {
   const onSubmit = async (data: FormData) => {
     try {
       await mutateAsync({
-        userName: data.userName,
+        nome: data.nome,
         nickname: data.nickname,
         email: data.email,
         password: data.password,
@@ -75,8 +75,8 @@ function RegisterPage() {
             <CyberInput
               label="Nome"
               placeholder="Seu nome"
-              error={errors.userName?.message}
-              {...register("userName")}
+              error={errors.nome?.message}
+              {...register("nome")}
             />
             <CyberInput
               label="Nickname"

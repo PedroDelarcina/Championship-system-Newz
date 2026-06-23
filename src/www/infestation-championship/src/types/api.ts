@@ -29,8 +29,22 @@ export interface RegistroDto {
   email: string;
   password: string;
   confirmPassword: string;
-  userName: string;
+  nome: string;
   nickname: string;
+}
+
+export interface ForgotPasswordDto {
+  email: string;
+}
+
+export interface ResetPasswordDto {
+  email: string;
+  token: string;
+  newPassword: string;
+}
+
+export interface MessageResponseDto {
+  message: string;
 }
 
 export type StatusCampeonato =

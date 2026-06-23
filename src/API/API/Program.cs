@@ -11,6 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
+using Resend;
+using dotenv.net;
 using System.Text.Json;
 
 
@@ -18,6 +20,9 @@ using System.Text.Json;
 var builder = WebApplication.CreateBuilder(args);
 
 
+DotEnv.Load();
+
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -28,9 +33,18 @@ builder.Services.AddIdentity<Usuario, IdentityRole>()
     .AddDefaultTokenProviders();
 
 
+/*builder.Services.AddOptions();
+
+builder.Services.AddHttpClient<ResendClient>();
+
+builder.Services.Configure<ResendClientOptions>(options =>
+{
+    options.ApiToken = builder.Configuration["Resend:ApiKey"]!;
+}); */
+
 //Config JWT
 builder.Services.AddJwtAuthentication(builder.Configuration);
-
+//Config injeção de dependência
 builder.Services.AddDependencyInjection();
 
 builder.Services.AddControllers()
@@ -84,12 +98,12 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
 
 
 if (!app.Environment.IsDevelopment())

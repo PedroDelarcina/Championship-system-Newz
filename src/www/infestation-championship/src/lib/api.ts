@@ -40,13 +40,22 @@ api.interceptors.response.use(
 export function getApiErrorMessage(err: unknown): string {
   if (axios.isAxiosError(err)) {
     const data = err.response?.data as
-      | { message?: string; title?: string; errors?: Record<string, string[]> }
+      | {
+          message?: string;
+          title?: string;
+          errors?: Record<string, string[]> | string[];
+        }
       | undefined;
     if (data?.message) return data.message;
     if (data?.title) return data.title;
     if (data?.errors) {
-      const first = Object.values(data.errors)[0]?.[0];
-      if (first) return first;
+      if (Array.isArray(data.errors)) {
+        const first = data.errors.find(Boolean);
+        if (first) return first;
+      } else {
+        const first = Object.values(data.errors)[0]?.[0];
+        if (first) return first;
+      }
     }
     if (err.message === "Network Error") {
       return "Não foi possível conectar à API. Verifique se o backend C# está rodando em " +

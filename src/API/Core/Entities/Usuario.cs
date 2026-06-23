@@ -7,6 +7,7 @@ namespace Core.Entities
 {
     public  class Usuario : IdentityUser
     {
+        public string Nome { get; set; } = string.Empty;
         public string NickName { get; set; } = string.Empty;
         public DateTime DataRegistro { get; set; } = DateTime.UtcNow;
         public bool IsAdmin { get; set; } = false;

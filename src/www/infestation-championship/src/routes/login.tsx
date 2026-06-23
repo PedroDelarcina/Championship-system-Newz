@@ -78,6 +78,14 @@ function LoginPage() {
               error={errors.password?.message}
               {...register("password")}
             />
+            <div className="text-right -mt-2">
+              <Link
+                to="/esqueci-senha"
+                className="text-xs uppercase tracking-widest text-blood-bright font-bold hover:underline"
+              >
+                Esqueci minha senha
+              </Link>
+            </div>
             <CyberButton
               type="submit"
               size="lg"

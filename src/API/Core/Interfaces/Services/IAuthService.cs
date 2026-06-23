@@ -14,5 +14,8 @@ namespace Core.Interfaces.Services
 
         Task<AuthResult<UsuarioResponseDto>> UsuarioLogadoAsync(string userId);
 
+        Task<AuthResult<bool>> ResetarSenhaAsync(ResetPasswordDto resetPasswordDto);
+        Task<AuthResult<bool>> EsqueciSenhaAsync(ForgotPasswordDto forgotPasswordDto);
+
     }
 }

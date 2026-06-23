@@ -2,6 +2,7 @@
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Infrastructure.Repositories;
+using Resend;
 using System.Text;
 
 namespace API.Extensions
@@ -33,6 +34,8 @@ namespace API.Extensions
             services.AddScoped<ICampeonatoService, CampeonatoService>();
             services.AddScoped<ITimeService, TimeService>();
             services.AddScoped<IInscricaoService, InscricaoService>();
+            services.AddScoped<IEmailService, EmailService>();
+           // services.AddTransient<IResend, ResendClient>();
 
             //Serviço de autenticação
             services.AddScoped<IAuthService, AuthService>();
