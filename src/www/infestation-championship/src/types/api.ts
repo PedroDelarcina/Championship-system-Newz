@@ -126,6 +126,7 @@ export interface InscricaoListDto {
   dataInscricao: string;
   status: StatusInscricao;
   campeonatoNome: string;
+  campeonatoId: number;
   campeonatoDataInicio: string;
   timeNome: string;
   timeTag: string;

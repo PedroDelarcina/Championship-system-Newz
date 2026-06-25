@@ -30,5 +30,28 @@ export function statusInscricaoLabel(s: StatusInscricao): string {
     Eliminado: "Eliminado",
     Campeao: "Campeão",
   };
-  return map[s] ?? String(s);
+  return map[String(s)] ?? String(s);
+}
+
+export type InscricaoStatusKind =
+  | "pending"
+  | "confirmed"
+  | "canceled"
+  | "eliminated"
+  | "champion"
+  | "other";
+
+export function statusInscricaoKind(s: StatusInscricao): InscricaoStatusKind {
+  const v = String(s).toLowerCase();
+  if (v.includes("pendent")) return "pending";
+  if (v.includes("confirm")) return "confirmed";
+  if (v.includes("cancel")) return "canceled";
+  if (v.includes("elimin")) return "eliminated";
+  if (v.includes("campe")) return "champion";
+  return "other";
+}
+
+export function inscricaoStatusAtiva(s: StatusInscricao): boolean {
+  const k = statusInscricaoKind(s);
+  return k === "pending" || k === "confirmed" || k === "champion";
 }

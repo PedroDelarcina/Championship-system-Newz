@@ -43,6 +43,7 @@ namespace API.Service
                 DataInscricao = i.DataInscricao,
                 Status = i.Status.ToString(),
                 CampeonatoNome = i.Campeonato?.Nome ?? "Campeonato não encontrado",
+                CampeonatoId = i.CampeonatoId,
                 CampeonatoDataInicio = i.Campeonato?.DataInicio ?? DateTime.MinValue,
                 TimeNome = i.Time?.Nome ?? "Time não encontrado",
                 TimeTag = i.Time?.Clantag ?? string.Empty,
@@ -107,6 +108,7 @@ namespace API.Service
                 DataInscricao = i.DataInscricao,
                 Status = i.Status.ToString(),
                 CampeonatoNome = i.Campeonato?.Nome ?? "Campeonato não encontrado",
+                CampeonatoId = i.CampeonatoId,
                 CampeonatoDataInicio = i.Campeonato?.DataInicio ?? DateTime.MinValue,
                 TimeNome = i.Time?.Nome ?? "Time não encontrado",
                 TimeTag = i.Time?.Clantag ?? string.Empty,
@@ -125,6 +127,7 @@ namespace API.Service
                 DataInscricao = i.DataInscricao,
                 Status = i.Status.ToString(),
                 CampeonatoNome = i.Campeonato?.Nome ?? "Campeonato não encontrado",
+                CampeonatoId = i.CampeonatoId,
                 CampeonatoDataInicio = i.Campeonato?.DataInicio ?? DateTime.MinValue,
                 TimeNome = i.Time?.Nome ?? "Time não encontrado",
                 TimeTag = i.Time?.Clantag ?? string.Empty,
@@ -210,9 +213,6 @@ namespace API.Service
             if (campeonato == null)
                 throw new KeyNotFoundException("Campeonato não encontrado.");
 
-            if (!campeonato.IsAtivo)
-                throw new InvalidOperationException("Não é possível se inscrever em um campeonato inativo.");
-
             if(campeonato.DataInicio <= DateTime.UtcNow)
                 throw new InvalidOperationException("Não é possível se inscrever em um campeonato que já começou.");
 
@@ -223,6 +223,20 @@ namespace API.Service
             var isLider = time.Players?.Any(p => p.UsuarioId == usuarioId && p.isLider) ?? false;
             if(!isLider)
                 throw new UnauthorizedAccessException("Apenas o líder do time pode realizar a inscrição.");
+
+            var inscricaoExistente = await _inscricaoRepository.GetInscricaoByCampeonatoAndTimeAsync(
+                inscricaoRequestDto.CampeonatoId,
+                inscricaoRequestDto.TimeId,
+                cancellationToken);
+
+            if (inscricaoExistente != null &&
+                (inscricaoExistente.Status == StatusInscricao.Pendente ||
+                 inscricaoExistente.Status == StatusInscricao.Confirmado ||
+                 inscricaoExistente.Status == StatusInscricao.Eliminado ||
+                 inscricaoExistente.Status == StatusInscricao.Campeao))
+            {
+                throw new InvalidOperationException("Este time já possui inscrição ativa neste campeonato.");
+            }
 
             var totalInscricoes = await _inscricaoRepository.GetTotalInscritoCampeonatoAsync(inscricaoRequestDto.CampeonatoId, cancellationToken);
             if(totalInscricoes >= campeonato.MaxParticipantes)
@@ -261,6 +275,20 @@ namespace API.Service
             var inscricao = await _inscricaoRepository.GetByIdAsync(inscricaoId, cancellationToken);
             if (inscricao == null)
                 throw new KeyNotFoundException("Inscrição não encontrada.");
+
+            if (inscricao.Status == StatusInscricao.Campeao)
+            {
+                var campeonato = await _campeonatoRepository.GetByIdAsync(inscricao.CampeonatoId, cancellationToken);
+                if (campeonato != null)
+                {
+                    var time = await _timeRepository.GetByIdAsync(inscricao.TimeId, cancellationToken);
+                    if (time != null && campeonato.Campeao == time.Nome)
+                    {
+                        campeonato.Campeao = null;
+                        await _campeonatoRepository.UpdateAsync(campeonato, cancellationToken);
+                    }
+                }
+            }
 
             await _inscricaoRepository.DeleteAsync(inscricao, cancellationToken);
 

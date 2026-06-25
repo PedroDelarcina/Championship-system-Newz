@@ -11,6 +11,7 @@ namespace Core.DTOs.Inscricao
         public string Status { get; set; } = string.Empty; // "Pendente", "Confirmado", "Eliminado", "Campeão"
 
         public string CampeonatoNome { get; set; } = string.Empty;
+        public int CampeonatoId { get; set; }
         public DateTime CampeonatoDataInicio { get; set; }
         public string TimeNome { get; set; } = string.Empty;
         public string TimeTag { get; set; } = string.Empty;

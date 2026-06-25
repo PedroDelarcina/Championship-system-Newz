@@ -197,6 +197,8 @@ function makeInscricaoMutation(action: "aprovar" | "rejeitar" | "eliminar" | "ca
         qc.invalidateQueries({ queryKey: ["inscricoes"] });
         qc.invalidateQueries({ queryKey: ["campeonatos"] });
         qc.invalidateQueries({ queryKey: ["campeonato"] });
+        qc.invalidateQueries({ queryKey: ["meus-times"] });
+        qc.invalidateQueries({ queryKey: ["time"] });
       },
     });
   };
@@ -205,6 +207,22 @@ export const useAprovarInscricao = makeInscricaoMutation("aprovar");
 export const useReprovarInscricao = makeInscricaoMutation("rejeitar");
 export const useEliminarInscricao = makeInscricaoMutation("eliminar");
 export const useDefinirCampeao = makeInscricaoMutation("campeao");
+
+export function useRemoverInscricao() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (inscricaoId: string | number) => {
+      await api.delete(`/Inscricao/${inscricaoId}/removerInscricao`);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["inscricoes"] });
+      qc.invalidateQueries({ queryKey: ["campeonatos"] });
+      qc.invalidateQueries({ queryKey: ["campeonato"] });
+      qc.invalidateQueries({ queryKey: ["meus-times"] });
+      qc.invalidateQueries({ queryKey: ["time"] });
+    },
+  });
+}
 
 // ============ TIMES ============
 export function useMeusTimes() {

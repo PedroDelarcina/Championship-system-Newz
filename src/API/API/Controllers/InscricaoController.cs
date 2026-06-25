@@ -168,7 +168,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Cancelar a inscrição de um campeonato (apenas o líder do time pode cancelar) 
+        /// Cancelar a inscrição de um campeonato (apenas o líder do time ou admin podem cancelar) 
         /// </summary>
         [HttpDelete("{inscricaoId}/cancelarInscricao")]
         public async Task<IActionResult> CancelarInscricao(int inscricaoId, CancellationToken cancellationToken)
@@ -176,6 +176,7 @@ namespace API.Controllers
             try
             {
                 var userId = GetUserId();
+                var isAdmin = IsUserAdmin();
 
                 var inscricao = await _inscricaoService.CancelarInscricaoAsync(inscricaoId, userId, cancellationToken);
               

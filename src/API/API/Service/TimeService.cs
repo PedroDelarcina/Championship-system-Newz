@@ -2,6 +2,7 @@
 using Core.DTOs.PlayerTimeDto;
 using Core.DTOs.Time;
 using Core.Entities;
+using Core.Entities.Enums;
 using Core.Interfaces.Repositories;
 using Core.Interfaces.Services;
 using Infrastructure.Data;
@@ -166,10 +167,17 @@ namespace API.Service
             if (!isLider && !isAdmin)
                 throw new UnauthorizedAccessException("Apenas o líder ou administrador pode deleter o time.");
 
-            var temInscricoes = await _dbContext.Inscricoes.AnyAsync(i => i.TimeId == timeId, cancellationToken);
+            var temInscricoesAtivas = await _dbContext.Inscricoes.AnyAsync(
+                i => i.TimeId == timeId &&
+                     (i.Status == StatusInscricao.Pendente ||
+                      i.Status == StatusInscricao.Confirmado ||
+                      i.Status == StatusInscricao.Campeao),
+                cancellationToken);
 
-            if (temInscricoes)
-                throw new InvalidOperationException("Não é possível deletar um time que possui inscrições em campeonatos. Remova as inscrições primeiro.");
+            if (temInscricoesAtivas)
+                throw new InvalidOperationException(
+                    "Não é possível deletar um time com inscrição ativa em campeonato. " +
+                    "Cancele/rejeite a inscrição ou peça ao admin para removê-la permanentemente.");
 
             var playersDoTime = _dbContext.PlayerTimes.Where(pt => pt.TimeId == timeId);
             _dbContext.PlayerTimes.RemoveRange(playersDoTime);
@@ -197,7 +205,7 @@ namespace API.Service
             if (playerId == null)
                 throw new InvalidOperationException("Jogador não está neste time.");
 
-            if (playerTime.isLider && time.Players?.Count > 1)
+            if (playerTime!.isLider && time.Players?.Count > 1)
                 throw new InvalidOperationException("Não é permitido remover o líder do time enquanto o houver outros jogadores.");
 
             _dbContext.PlayerTimes.Remove(playerTime);

@@ -67,7 +67,12 @@ namespace Infrastructure.Repositories
 
         public async Task<int> GetTotalInscritoCampeonatoAsync(int campeonatoId, CancellationToken cancellationToken)
         {
-            return await _dbSet.CountAsync(i => i.CampeonatoId == campeonatoId, cancellationToken);
+            return await _dbSet.CountAsync(
+                i => i.CampeonatoId == campeonatoId &&
+                     (i.Status == StatusInscricao.Pendente ||
+                      i.Status == StatusInscricao.Confirmado ||
+                      i.Status == StatusInscricao.Campeao),
+                cancellationToken);
         }
 
         public async Task<bool> UpdateStatusInscricaoAsync(int inscricaoId, StatusInscricao novoStatus, CancellationToken cancellationToken)
