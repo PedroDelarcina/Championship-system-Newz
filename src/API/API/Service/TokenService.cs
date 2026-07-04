@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 
 namespace API.Service
 {
@@ -21,17 +22,18 @@ namespace API.Service
             var key = _configuration["Jwt:Key"]
                       ?? throw new Exception("Jwt:Key não configurada");
 
-            return Convert.FromBase64String(key);
+            //return Convert.FromBase64String(key);
+            return Encoding.UTF8.GetBytes(key);
         }
 
         private TokenModel GenerateToken(Claim[] claim, CancellationToken cancellationToken = default)
-        {
+        {    
             var tokenHandler = new JwtSecurityTokenHandler();
             if (!double.TryParse(_configuration.GetValue<string>("Extra: TokenExpirationTime"),
-                    out double tokenExpirationTime)) tokenExpirationTime = 4;
+                out double tokenExpirationTime)) tokenExpirationTime = 4;
 
             var key = GetKey();
-
+           
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claim),
