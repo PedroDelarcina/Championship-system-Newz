@@ -15,6 +15,7 @@ import {
   PageLoader,
 } from "@/components/ui-blocks";
 import { CyberButton } from "@/components/cyber-button";
+import { TeamLogo } from "@/components/team-logo";
 import { getApiErrorMessage } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -109,16 +110,19 @@ function MeusTimesLista() {
                 params={{ id: String(t.id) }}
                 className="cyber-cut-br bg-obsidian-light border border-obsidian-border border-l-4 border-l-blood-bright p-6 flex flex-col gap-4 hover:bg-obsidian-border/40 transition-colors group"
               >
-                <div className="flex items-start justify-between">
-                  <div>
-                    {t.clanTag && (
-                      <p className="text-blood-bright font-bold tracking-widest uppercase text-xs mb-1">
-                        [{t.clanTag}]
-                      </p>
-                    )}
-                    <h3 className="font-display text-3xl uppercase font-bold leading-none">
-                      {t.nome}
-                    </h3>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4 min-w-0">
+                    <TeamLogo url={t.logoUrl} name={t.nome} size={56} />
+                    <div className="min-w-0">
+                      {t.clanTag && (
+                        <p className="text-blood-bright font-bold tracking-widest uppercase text-xs mb-1">
+                          [{t.clanTag}]
+                        </p>
+                      )}
+                      <h3 className="font-display text-3xl uppercase font-bold leading-none">
+                        {t.nome}
+                      </h3>
+                    </div>
                   </div>
                   {souLider && (
                     <span className="cyber-badge bg-blood-bright text-white px-3 py-1 text-[10px] font-bold uppercase tracking-widest">

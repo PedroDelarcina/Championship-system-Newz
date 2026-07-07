@@ -46,6 +46,7 @@ namespace API.Service
                 TimeNome = i.Time?.Nome ?? "Time não encontrado",
                 TimeTag = i.Time?.Clantag ?? string.Empty,
                 TimeId = i.TimeId,
+                LogoUrl = i.Time?.LogoUrl,
                 TotalJogadores = i.Time?.Players.Count ?? 0
             });
         }
@@ -111,6 +112,7 @@ namespace API.Service
                 TimeNome = i.Time?.Nome ?? "Time não encontrado",
                 TimeTag = i.Time?.Clantag ?? string.Empty,
                 TimeId = i.TimeId,
+                LogoUrl = i.Time?.LogoUrl,
                 TotalJogadores = i.Time?.Players.Count ?? 0
             }); 
         }
@@ -130,6 +132,7 @@ namespace API.Service
                 TimeNome = i.Time?.Nome ?? "Time não encontrado",
                 TimeTag = i.Time?.Clantag ?? string.Empty,
                 TimeId = i.TimeId,
+                LogoUrl = i.Time?.LogoUrl,
                 TotalJogadores = i.Time?.Players.Count ?? 0
             });
         }

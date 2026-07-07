@@ -131,6 +131,7 @@ export interface InscricaoListDto {
   timeNome: string;
   timeTag: string;
   timeId: number;
+  logoUrl?: string | null;
   totalJogadores: number;
 }
 

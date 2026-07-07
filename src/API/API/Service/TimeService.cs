@@ -171,6 +171,7 @@ namespace API.Service
                 i => i.TimeId == timeId &&
                      (i.Status == StatusInscricao.Pendente ||
                       i.Status == StatusInscricao.Confirmado ||
+                      i.Status == StatusInscricao.Eliminado ||
                       i.Status == StatusInscricao.Campeao),
                 cancellationToken);
 

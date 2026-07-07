@@ -16,6 +16,7 @@ namespace Core.Entities
         public bool IsAtivo { get; set; } = true;
         public int MaxParticipantes { get; set; }
         public string? Campeao { get; set; }
+      //  public string? LogoUrl { get; set; } = string.Empty;
         public string? Status { get; set; }
 
 

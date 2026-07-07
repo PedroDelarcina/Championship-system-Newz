@@ -250,6 +250,19 @@ export function useTime(id: string | number | undefined) {
 
 export type TimeFormData = TimeRequestDto;
 
+export function useUploadLogo() {
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await api.post<{ url: string }>("/Upload/logo", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return res.data.url;
+    },
+  });
+}
+
 export function useCreateTime() {
   const qc = useQueryClient();
   return useMutation({

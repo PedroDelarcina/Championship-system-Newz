@@ -15,6 +15,27 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+/** Base da API sem o sufixo /api — usada para servir arquivos estáticos (logos). */
+export function getApiOrigin(): string {
+  const base = import.meta.env.VITE_API_URL || defaultApiBase;
+  return base.replace(/\/api\/?$/, "");
+}
+
+/** Converte URL relativa (/uploads/...) ou absoluta em URL completa para exibição. */
+export function resolveAssetUrl(url?: string | null): string | undefined {
+  if (!url) return undefined;
+  if (
+    url.startsWith("http://") ||
+    url.startsWith("https://") ||
+    url.startsWith("data:") ||
+    url.startsWith("blob:")
+  ) {
+    return url;
+  }
+  const origin = getApiOrigin();
+  return `${origin}${url.startsWith("/") ? url : `/${url}`}`;
+}
+
 api.interceptors.request.use((config) => {
   if (config.skipAuth) return config;
   const token = useAuthStore.getState().token;

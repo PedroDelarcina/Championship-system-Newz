@@ -10,6 +10,7 @@ import {
 } from "@/hooks/api";
 import { CyberButton } from "@/components/cyber-button";
 import { StatusBadge } from "@/components/status-badge";
+import { TeamLogo } from "@/components/team-logo";
 import { ErrorBox, PageLoader } from "@/components/ui-blocks";
 import { getApiErrorMessage } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
@@ -177,15 +178,27 @@ function CampeonatoDetalhePage() {
                 {c.inscricoes.map((i) => (
                   <div
                     key={i.id}
-                    className="cyber-cut bg-obsidian-light border border-obsidian-border p-4 flex items-center justify-between"
+                    className="cyber-cut bg-obsidian-light border border-obsidian-border p-4 flex items-center justify-between gap-3"
                   >
-                    <div>
-                      <p className="font-bold text-white">
-                        {i.timeNome}
-                      </p>
-                      <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                        {statusInscricaoLabel(i.status)}
-                      </p>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <TeamLogo
+                        url={i.logoUrl}
+                        name={i.timeNome}
+                        size={44}
+                      />
+                      <div className="min-w-0">
+                        <p className="font-bold text-white truncate">
+                          {i.timeNome}
+                        </p>
+                        {i.timeTag && (
+                          <p className="text-xs text-blood-bright uppercase tracking-wider">
+                            [{i.timeTag}]
+                          </p>
+                        )}
+                        <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                          {statusInscricaoLabel(i.status)}
+                        </p>
+                      </div>
                     </div>
                     {String(i.status).toLowerCase().includes("campe") && (
                       <Award className="size-6 text-status-open" />

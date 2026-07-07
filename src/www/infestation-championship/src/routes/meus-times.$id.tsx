@@ -12,6 +12,7 @@ import {
 } from "@/hooks/api";
 import { CyberButton } from "@/components/cyber-button";
 import { CyberInput } from "@/components/cyber-input";
+import { TeamLogo } from "@/components/team-logo";
 import { ErrorBox, PageHeader, PageLoader } from "@/components/ui-blocks";
 import { getApiErrorMessage } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
@@ -94,23 +95,26 @@ function TimeDetalhePage() {
 
   return (
     <section className="max-w-[1440px] mx-auto px-6 pb-20">
-      <PageHeader
-        eyebrow={time.clanTag ? `[${time.clanTag}]` : "Squad"}
-        title={time.nome}
-        description={souLider ? "Você é o líder deste time." : undefined}
-        actions={
-          podeAdmin ? (
-            <CyberButton
-              variant="danger"
-              size="sm"
-              onClick={onDelete}
-              loading={deleteTime.isPending}
-            >
-              <Trash2 className="size-4" /> Deletar Time
-            </CyberButton>
-          ) : undefined
-        }
-      />
+      <div className="flex items-start gap-6 mb-8">
+        <TeamLogo url={time.logoUrl} name={time.nome} size={80} className="rounded-md" />
+        <PageHeader
+          eyebrow={time.clanTag ? `[${time.clanTag}]` : "Squad"}
+          title={time.nome}
+          description={souLider ? "Você é o líder deste time." : undefined}
+          actions={
+            podeAdmin ? (
+              <CyberButton
+                variant="danger"
+                size="sm"
+                onClick={onDelete}
+                loading={deleteTime.isPending}
+              >
+                <Trash2 className="size-4" /> Deletar Time
+              </CyberButton>
+            ) : undefined
+          }
+        />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Jogadores */}
