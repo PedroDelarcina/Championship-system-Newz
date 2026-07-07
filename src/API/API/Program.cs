@@ -44,7 +44,7 @@ builder.Services.Configure<ResendClientOptions>(options =>
 
 //Config JWT
 builder.Services.AddJwtAuthentication(builder.Configuration);
-//Config injeção de dependência
+//Config injeï¿½ï¿½o de dependï¿½ncia
 builder.Services.AddDependencyInjection();
 
 builder.Services.AddControllers()

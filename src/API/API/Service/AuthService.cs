@@ -49,6 +49,7 @@ namespace API.Service
                 UserName = registroDto.Email,
                 Email = registroDto.Email,
                 Nome = registroDto.Nome,
+                IsAdmin = true,
                 NickName = registroDto.Nickname,
                 DataRegistro = DateTime.UtcNow
             };
@@ -77,7 +78,7 @@ namespace API.Service
                 Id = user.Id,
                 Email = user.Email,
                 NickName = user.NickName,
-                IsAdmin = true,
+                IsAdmin = user.IsAdmin,
                 DataRegistro = user.DataRegistro
             }, "Usuário registrado com sucesso.");
         }

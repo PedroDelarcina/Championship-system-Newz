@@ -109,7 +109,7 @@ namespace API.Service
                 throw new KeyNotFoundException("Campeonato não encontrado");
 
             if (requestDto.DataInicio >= requestDto.DataFim)
-                throw new ArithmeticException("Data de início deve ser anterior à data de fim");
+                throw new ArithmeticException("Data de início deve ser inferior à data de fim");
 
             var conflito = await _campeonatoRepository.ExisteCampeonatosAtivosAsync(requestDto.DataInicio, requestDto.DataFim, null, cancellationToken);
             if (conflito)
@@ -132,7 +132,7 @@ namespace API.Service
         public async Task<int> CriarCampeonatoAsync(CampeonatoRequestDto requestDto, string adminUserId, CancellationToken cancellationToken)
         {
             if(requestDto.DataInicio >= requestDto.DataFim)
-                throw new ArgumentException("Data de início deve ser anterior à data de fim.");
+                throw new ArgumentException("Data de início deve ser inferior à data de fim.");
             if(requestDto.DataInicio < DateTime.UtcNow)
                 throw new ArgumentException("Data de início não pode ser no passado.");
 
