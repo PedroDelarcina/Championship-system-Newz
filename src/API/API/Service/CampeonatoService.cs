@@ -88,32 +88,32 @@ namespace API.Service
             });
         }
 
-        public async Task<bool> AlternarStatusCampeonatoAsync(int id, string adminUserId, CancellationToken cancellationToken)
+        public async Task<AuthResult<bool>> AlternarStatusCampeonatoAsync(int id, string adminUserId, CancellationToken cancellationToken)
         {
            var campeonato = await _campeonatoRepository.GetByIdAsync(id, cancellationToken);
             if (campeonato == null)
-                throw new KeyNotFoundException("Campeonato não encontrado");
+                return AuthResult<bool>.FailureResult("Campeonato não encontrado", 404);
 
             campeonato.IsAtivo = !campeonato.IsAtivo;
             await _campeonatoRepository.UpdateAsync(campeonato, cancellationToken);
 
             _logger.LogInformation($"Campeonato {(campeonato.IsAtivo ? "ativado" : "desativado")} por admin {adminUserId}");
 
-            return true;
+            return AuthResult<bool>.SuccessResult(true);
         }
 
-        public async Task<bool> AtualizarCampeonatoAsync(int id, CampeonatoRequestDto requestDto, string adminUserId, CancellationToken cancellationToken)
+        public async Task<AuthResult<bool>> AtualizarCampeonatoAsync(int id, CampeonatoRequestDto requestDto, string adminUserId, CancellationToken cancellationToken)
         {
             var campeonato = await _campeonatoRepository.GetByIdAsync(id, cancellationToken);
             if (campeonato == null)
-                throw new KeyNotFoundException("Campeonato não encontrado");
+                return AuthResult<bool>.FailureResult("Campeonato não encontrado", 404);
 
             if (requestDto.DataInicio >= requestDto.DataFim)
-                throw new ArithmeticException("Data de início deve ser inferior à data de fim");
+                return AuthResult<bool>.FailureResult("Data de início deve ser inferior à data de fim", 400);
 
             var conflito = await _campeonatoRepository.ExisteCampeonatosAtivosAsync(requestDto.DataInicio, requestDto.DataFim, null, cancellationToken);
             if (conflito)
-                throw new InvalidOperationException("Já existe outro campeonato ativo nesse período");
+                return AuthResult<bool>.FailureResult("Já existe outro campeonato ativo nesse período", 400);
 
             campeonato.Nome = requestDto.Nome;
             campeonato.TipoCampeonato = requestDto.TipoCampeonato;
@@ -126,19 +126,19 @@ namespace API.Service
             await _campeonatoRepository.UpdateAsync(campeonato, cancellationToken);
             _logger.LogInformation($"Campeonato atualizado: {campeonato.Nome} por admin {adminUserId}");
 
-            return true;
+            return AuthResult<bool>.SuccessResult(true);
         }
 
-        public async Task<int> CriarCampeonatoAsync(CampeonatoRequestDto requestDto, string adminUserId, CancellationToken cancellationToken)
+        public async Task<AuthResult<int>> CriarCampeonatoAsync(CampeonatoRequestDto requestDto, string adminUserId, CancellationToken cancellationToken)
         {
             if(requestDto.DataInicio >= requestDto.DataFim)
-                throw new ArgumentException("Data de início deve ser inferior à data de fim.");
+                return AuthResult<int>.FailureResult("Data de início deve ser inferior à data de fim.", 400);
             if(requestDto.DataInicio < DateTime.UtcNow)
-                throw new ArgumentException("Data de início não pode ser no passado.");
+                return AuthResult<int>.FailureResult("Data de início não pode ser no passado.", 400);
 
             var conflito = await _campeonatoRepository.ExisteCampeonatosAtivosAsync(requestDto.DataInicio, requestDto.DataFim, null, cancellationToken);
             if(conflito)
-                throw new InvalidOperationException("Já existe um campeonato ativo no período informado.");
+                return AuthResult<int>.FailureResult("Já existe um campeonato ativo no período informado.", 400);
 
             var campeonato = new Campeonato
             {
@@ -156,22 +156,22 @@ namespace API.Service
 
             _logger.LogInformation($"Campeonato criado: {result.Nome} por admin {adminUserId}");
 
-            return result.Id;
+            return AuthResult<int>.SuccessResult(result.Id);
         }
 
-        public async Task<bool> DeletarCampeonatoAsync(int id, string adminUserId, CancellationToken cancellationToken)
+        public async Task<AuthResult<bool>> DeletarCampeonatoAsync(int id, string adminUserId, CancellationToken cancellationToken)
         {
             var campeonato = await _campeonatoRepository.GetByIdAsync(id, cancellationToken);
             if (campeonato == null)
-                throw new KeyNotFoundException("Campeonato não encontrado");
+                return AuthResult<bool>.FailureResult("Campeonato não encontrado", 404);
 
             if (campeonato.Inscricoes != null && campeonato.Inscricoes.Any())
-                throw new InvalidOperationException("Não é possivel  deletar um campeonato com inscrições ativas");
+                return AuthResult<bool>.FailureResult("Não é possivel  deletar um campeonato com inscrições ativas", 400);
 
             await _campeonatoRepository.DeleteAsync(campeonato, cancellationToken);
             _logger.LogInformation($"Campeonato deletado: {campeonato.Nome} por admin {adminUserId}");
 
-            return true;
+            return AuthResult<bool>.SuccessResult(true);
         }
 
     }

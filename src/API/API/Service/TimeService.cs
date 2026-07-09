@@ -81,28 +81,28 @@ namespace API.Service
                 Lider = t.Players?.FirstOrDefault(pt => pt.isLider)?.Player?.NickName,
             });
         }
-        public async Task<bool> AdicionarPlayerTimeAsync(AddPlayerTimeDto addPlayerTimeDto, string usuarioLogadoId, CancellationToken cancellationToken)
+        public async Task<AuthResult<bool>> AdicionarPlayerTimeAsync(AddPlayerTimeDto addPlayerTimeDto, string usuarioLogadoId, CancellationToken cancellationToken)
         {
             var time = await _timeRepository.GetTimeWithJogadoresAsync(addPlayerTimeDto.TimeId, cancellationToken);
 
             if (time == null)
-                throw new KeyNotFoundException("Time não encontrado.");
+                return AuthResult<bool>.FailureResult("Time não encontrado.", 404);
 
             var isLider = time.Players?.Any(p => p.UsuarioId == usuarioLogadoId && p.isLider) ?? false;
 
             if (!isLider)
-                throw new UnauthorizedAccessException("Apenas o líder do time pode adicionar jogadores.");
+                return AuthResult<bool>.FailureResult("Apenas o líder do time pode adicionar jogadores.", 403);
 
             if(time.Players?.Any(p => p.UsuarioId == addPlayerTimeDto.UsuarioId) == true)
-                throw new InvalidOperationException("Jogador já pertence a este time.");
+                return AuthResult<bool>.FailureResult("Jogador já pertence a este time.", 400);
 
             var jogadorOutroTime = await _dbContext.PlayerTimes.AnyAsync(pt => pt.UsuarioId == addPlayerTimeDto.UsuarioId, cancellationToken);
             if (jogadorOutroTime)
-                throw new InvalidOperationException("Jogador já pertence a outro time.");
+                return AuthResult<bool>.FailureResult("Jogador já pertence a outro time.", 400);
 
             var player = await _dbContext.Users.FindAsync(addPlayerTimeDto.UsuarioId);
             if (player == null)
-                throw new KeyNotFoundException("Jogador não encontrado.");
+                return AuthResult<bool>.FailureResult("Jogador não encontrado.", 404);
 
             var playerTime = new PlayerTime
             {
@@ -116,18 +116,18 @@ namespace API.Service
 
             _logger.LogInformation($"Jogador {addPlayerTimeDto.UsuarioId} adicionado ao time {time.Nome} por {usuarioLogadoId}");
 
-            return true;
+            return AuthResult<bool>.SuccessResult(true, "Jogador adicionado ao time com sucesso.");
         }
 
-        public async Task<int> CriarTimeAsync(TimeRequestDto timeRequestDto, string usuarioId, CancellationToken cancellationToken)
+        public async Task<AuthResult<int>> CriarTimeAsync(TimeRequestDto timeRequestDto, string usuarioId, CancellationToken cancellationToken)
         {
             var usuarioTemTime = await _dbContext.PlayerTimes.AnyAsync(pt => pt.UsuarioId == usuarioId, cancellationToken);
             if (usuarioTemTime)
-                throw new InvalidOperationException("Usuário já pertence a um time.");
+                return AuthResult<int>.FailureResult("Usuário já pertence a um time.", 400);
 
             var timeExistente = await _timeRepository.GetTimeByNomeAsync(timeRequestDto.Nome, cancellationToken);
             if (timeExistente != null)
-                throw new InvalidOperationException("Já existe um time com esse nome.");
+                return AuthResult<int>.FailureResult("Já existe um time com esse nome.", 400);
 
             var novoTime = new Time
             {
@@ -151,21 +151,21 @@ namespace API.Service
 
             _logger.LogInformation($"Time criado com sucesso: {time.Nome} pelo usuário {usuarioId}");
 
-            return time.Id;
+            return AuthResult<int>.SuccessResult(time.Id, "Time criado com sucesso.");
         }
 
-        public async Task<bool> DeletarTimeAsync(int timeId, string usuarioLogadoId, CancellationToken cancellationToken)
+        public async Task<AuthResult<bool>> DeletarTimeAsync(int timeId, string usuarioLogadoId, CancellationToken cancellationToken)
         {
             var time = await _timeRepository.GetTimeWithJogadoresAsync(timeId, cancellationToken);
             if (time == null)
-                throw new KeyNotFoundException("Time não encontrado."); 
+                return AuthResult<bool>.FailureResult("Time não encontrado.", 404);
             
             var isLider = time.Players?.Any(p => p.UsuarioId == usuarioLogadoId && p.isLider) ?? false;
 
             var isAdmin = await _dbContext.Users.AnyAsync(u => u.Id == usuarioLogadoId && u.IsAdmin, cancellationToken);
 
             if (!isLider && !isAdmin)
-                throw new UnauthorizedAccessException("Apenas o líder ou administrador pode deleter o time.");
+                return AuthResult<bool>.FailureResult("Apenas o líder ou administrador pode deletar o time.", 403);
 
             var temInscricoesAtivas = await _dbContext.Inscricoes.AnyAsync(
                 i => i.TimeId == timeId &&
@@ -176,9 +176,9 @@ namespace API.Service
                 cancellationToken);
 
             if (temInscricoesAtivas)
-                throw new InvalidOperationException(
+                return AuthResult<bool>.FailureResult(
                     "Não é possível deletar um time com inscrição ativa em campeonato. " +
-                    "Cancele/rejeite a inscrição ou peça ao admin para removê-la permanentemente.");
+                    "Cancele/rejeite a inscrição ou peça ao admin para removê-la permanentemente.", 403);
 
             var playersDoTime = _dbContext.PlayerTimes.Where(pt => pt.TimeId == timeId);
             _dbContext.PlayerTimes.RemoveRange(playersDoTime);
@@ -188,26 +188,26 @@ namespace API.Service
 
             _logger.LogInformation($"Time {time.Nome} deletado por {usuarioLogadoId}");
 
-            return true;
+            return AuthResult<bool>.SuccessResult(true, "Time deletado com sucesso.");
         }
 
-        public async Task<bool> RemoverPlayerTimeAsync(int timeId, string playerId, string usuarioLogadoId, CancellationToken cancellationToken)
+        public async Task<AuthResult<bool>> RemoverPlayerTimeAsync(int timeId, string playerId, string usuarioLogadoId, CancellationToken cancellationToken)
         {
             var time = await _timeRepository.GetTimeWithJogadoresAsync(timeId, cancellationToken);
             if (time == null)
-                throw new KeyNotFoundException("Time não encontrado");
+                return AuthResult<bool>.FailureResult("Time não encontrado", 404);
 
             var isLider = time.Players?.Any(p => p.UsuarioId == usuarioLogadoId && p.isLider) ?? false;
 
             if (!isLider)
-                throw new UnauthorizedAccessException("Apenas o lider do time pode remover jogadores.");
+                return AuthResult<bool>.FailureResult("Apenas o lider do time pode remover jogadores.", 403);
 
             var playerTime = time.Players?.FirstOrDefault(p => p.UsuarioId == playerId);
             if (playerId == null)
                 throw new InvalidOperationException("Jogador não está neste time.");
 
             if (playerTime!.isLider && time.Players?.Count > 1)
-                throw new InvalidOperationException("Não é permitido remover o líder do time enquanto o houver outros jogadores.");
+                return AuthResult<bool>.FailureResult("Não é permitido remover o líder do time enquanto o houver outros jogadores.", 403);
 
             _dbContext.PlayerTimes.Remove(playerTime);
             await _dbContext.SaveChangesAsync(cancellationToken);
@@ -219,12 +219,12 @@ namespace API.Service
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 _logger.LogInformation($"Time {time.Nome} deletado por não conter mais jogadores.");
 
-                return true;
+                return AuthResult<bool>.SuccessResult(true, "Time deletado com sucesso.");
             }
 
             _logger.LogInformation($"Jogador {playerId} removido do time {time.Nome} por {usuarioLogadoId}");
 
-            return true;
+            return AuthResult<bool>.SuccessResult(true, "Jogador removido com sucesso.");
         }
     }
 }

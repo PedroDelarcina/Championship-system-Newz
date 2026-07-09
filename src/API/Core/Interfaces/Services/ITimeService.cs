@@ -1,5 +1,6 @@
 ﻿using Core.DTOs.PlayerTimeDto;
 using Core.DTOs.Time;
+using Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,10 +14,10 @@ namespace Core.Interfaces.Services
 
         Task<IEnumerable<TimeResponseDto>> ObterMeusTimesAsync(string usuarioId, CancellationToken cancellationToken);
 
-        Task<int> CriarTimeAsync(TimeRequestDto timeRequestDto, string usuarioId, CancellationToken cancellationToken);
-        Task<bool> AdicionarPlayerTimeAsync(AddPlayerTimeDto addPlayerTimeDto, string usuarioLogadoId, CancellationToken cancellationToken);
-        Task<bool> RemoverPlayerTimeAsync(int timeId, string playerId, string usuarioLogadoId, CancellationToken cancellationToken);
-        Task<bool> DeletarTimeAsync(int timeId, string usuarioLogadoId, CancellationToken cancellationToken);
+        Task<AuthResult<int>> CriarTimeAsync(TimeRequestDto timeRequestDto, string usuarioId, CancellationToken cancellationToken);
+        Task<AuthResult<bool>> AdicionarPlayerTimeAsync(AddPlayerTimeDto addPlayerTimeDto, string usuarioLogadoId, CancellationToken cancellationToken);
+        Task<AuthResult<bool>> RemoverPlayerTimeAsync(int timeId, string playerId, string usuarioLogadoId, CancellationToken cancellationToken);
+        Task<AuthResult<bool>> DeletarTimeAsync(int timeId, string usuarioLogadoId, CancellationToken cancellationToken);
 
     }
 }

@@ -14,6 +14,7 @@ using System.Text;
 using Resend;
 using dotenv.net;
 using System.Text.Json;
+using API.Middlewares;
 
 
 
@@ -118,6 +119,8 @@ app.UseStaticFiles();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.MapControllers();
 

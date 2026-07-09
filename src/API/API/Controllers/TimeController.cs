@@ -144,9 +144,12 @@ namespace API.Controllers
                 var usuarioLogadoId = GetUserId();
 
                 var removido = await _timeService.RemoverPlayerTimeAsync(timeId, playerId, usuarioLogadoId, cancellationToken);
-                if (!removido)
+                if (removido.Success)
                 {
-                    return NotFound(new { message = "Time ou jogador não encontrado" });
+                    return StatusCode(removido.StatusCode, new
+                    {
+                        message = removido.Message
+                    });
                 }
               
                 return Ok(new { message = "Jogador removido com sucesso" });
@@ -185,11 +188,15 @@ namespace API.Controllers
 
                 var deletado = await _timeService.DeletarTimeAsync(id, usuarioLogadoId, cancellationToken);
 
-                if (!deletado)
-                    return NotFound("Time não encontrado");
-
-                return Ok(new { message = "Time deletado com sucesso! " });
-
+                if (!deletado.Success)
+                {
+                    return StatusCode(deletado.StatusCode, new
+                    {
+                      message = deletado.Message
+                    });
+                }
+                    
+                return Ok(new { message = deletado.Message });
             }
             catch (KeyNotFoundException ex)
             {

@@ -137,23 +137,23 @@ namespace API.Service
             });
         }
 
-        public async Task<bool> AprovarInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken)
+        public async Task<AuthResult<bool>> AprovarInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken)
         {
             var atualizado = await _inscricaoRepository.UpdateStatusInscricaoAsync(inscricaoId, StatusInscricao.Confirmado, cancellationToken);
 
             if (!atualizado)
-                throw new KeyNotFoundException("Inscrição não encontrada ou já processada.");
+                return AuthResult<bool>.FailureResult("Inscrição não encontrada ou já processada.", 404);
 
             _logger.LogInformation($"Inscrição {inscricaoId} aprovada pelo admin {adminUserId}.");
 
-            return true;
+            return AuthResult<bool>.SuccessResult(true);
         }
 
-        public async Task<bool> CancelarInscricaoAsync(int inscricaoId, string usuarioId, CancellationToken cancellationToken)
+        public async Task<AuthResult<bool>> CancelarInscricaoAsync(int inscricaoId, string usuarioId, CancellationToken cancellationToken)
         {
             var inscricao = await _inscricaoRepository.GetByIdAsync(inscricaoId, cancellationToken);
             if (inscricao == null)
-                throw new KeyNotFoundException("Inscrição não encontrada.");
+                return AuthResult<bool>.FailureResult("Inscrição não encontrada.", 404);
 
             var time = await _timeRepository.GetTimeWithJogadoresAsync(inscricao.TimeId, cancellationToken);
 
@@ -161,24 +161,24 @@ namespace API.Service
             var isAdmin = await _appDbContext.Users.AnyAsync(u => u.Id == usuarioId && u.IsAdmin, cancellationToken);   
 
             if(!isLider && !isAdmin)
-                throw new UnauthorizedAccessException("Apenas o líder do time ou um admin pode cancelar a inscrição.");
+                return AuthResult<bool>.FailureResult("Apenas o líder do time ou um administrador pode cancelar a inscrição.", 403);
 
             var campeonato = await _campeonatoRepository.GetByIdAsync(inscricao.CampeonatoId, cancellationToken);
             if (campeonato != null && campeonato.DataInicio <= DateTime.UtcNow)
-                throw new InvalidOperationException("Não é possível cancelar a inscrição de um campeonato que já começou.");
+                return AuthResult<bool>.FailureResult("Não é possível cancelar a inscrição em um campeonato que já começou.", 400);
 
             await _inscricaoRepository.DeleteAsync(inscricao, cancellationToken);
 
             _logger.LogInformation($"Inscrição {inscricaoId} cancelada pelo usuário {usuarioId}.");
 
-            return true;
+            return AuthResult<bool>.SuccessResult(true);
         }
 
-        public async Task<bool> DefinirCampeonatoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken)
+        public async Task<AuthResult<bool>> DefinirCampeonatoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken)
         {
            var inscricao = await _inscricaoRepository.GetByIdAsync(inscricaoId, cancellationToken);
             if (inscricao == null)
-                throw new KeyNotFoundException("Inscrição não encontrada ou já processada.");
+                return AuthResult<bool>.FailureResult("Inscrição não encontrada ou já processada.", 404);
 
             await _inscricaoRepository.UpdateStatusInscricaoAsync(inscricaoId, StatusInscricao.Campeao, cancellationToken);
 
@@ -192,38 +192,38 @@ namespace API.Service
 
             _logger.LogInformation($"Time definido como campeão (inscrição {inscricaoId} definida como campeã pelo admin {adminUserId}.");
 
-            return true;
+            return AuthResult<bool>.SuccessResult(true);
         }
 
-        public async Task<bool> EliminarTimeAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken)
+        public async Task<AuthResult<bool>> EliminarTimeAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken)
         {
             var atualizado = await _inscricaoRepository.UpdateStatusInscricaoAsync(inscricaoId, StatusInscricao.Eliminado, cancellationToken);
             if (!atualizado)
-                throw new KeyNotFoundException("Inscrição não encontrada ou já processada.");
+                return AuthResult<bool>.FailureResult("Inscrição não encontrada ou já processada.", 404);
 
             _logger.LogInformation($"Time eliminado do campeonato (inscrição {inscricaoId} eliminada pelo admin {adminUserId}).");
 
-            return true;
+            return AuthResult<bool>.SuccessResult(true);
 
         }
 
-        public async Task<int> InscreverTimeCampeonatoAsync(InscricaoRequestDto inscricaoRequestDto, string usuarioId, CancellationToken cancellationToken)
+        public async Task<AuthResult<int>> InscreverTimeCampeonatoAsync(InscricaoRequestDto inscricaoRequestDto, string usuarioId, CancellationToken cancellationToken) 
         {
             var campeonato = await _campeonatoRepository.GetByIdAsync(inscricaoRequestDto.CampeonatoId, cancellationToken);
 
             if (campeonato == null)
-                throw new KeyNotFoundException("Campeonato não encontrado.");
+                return AuthResult<int>.FailureResult("Campeonato não encontrado.", 404);
 
             if(campeonato.DataInicio <= DateTime.UtcNow)
-                throw new InvalidOperationException("Não é possível se inscrever em um campeonato que já começou.");
+                return AuthResult<int>.FailureResult("Não é possível se inscrever em um campeonato que já começou.", 400);
 
             var time = await _timeRepository.GetTimeWithJogadoresAsync(inscricaoRequestDto.TimeId, cancellationToken);
             if(time == null)
-                throw new KeyNotFoundException("Time não encontrado.");
+                return AuthResult<int>.FailureResult("Time não encontrado.", 404);
 
             var isLider = time.Players?.Any(p => p.UsuarioId == usuarioId && p.isLider) ?? false;
             if(!isLider)
-                throw new UnauthorizedAccessException("Apenas o líder do time pode realizar a inscrição.");
+                return AuthResult<int>.FailureResult("Apenas o líder do time pode realizar a inscrição.", 403);
 
             var inscricaoExistente = await _inscricaoRepository.GetInscricaoByCampeonatoAndTimeAsync(
                 inscricaoRequestDto.CampeonatoId,
@@ -236,12 +236,12 @@ namespace API.Service
                  inscricaoExistente.Status == StatusInscricao.Eliminado ||
                  inscricaoExistente.Status == StatusInscricao.Campeao))
             {
-                throw new InvalidOperationException("Este time já possui inscrição ativa neste campeonato.");
+                return AuthResult<int>.FailureResult("Este time já possui inscrição ativa neste campeonato.", 400);
             }
 
             var totalInscricoes = await _inscricaoRepository.GetTotalInscritoCampeonatoAsync(inscricaoRequestDto.CampeonatoId, cancellationToken);
             if(totalInscricoes >= campeonato.MaxParticipantes)
-                throw new InvalidOperationException("Número máximo de inscrições atingido para este campeonato.");
+                return AuthResult<int>.FailureResult("Número máximo de inscrições atingido para este campeonato.", 400);
 
             var inscricao = new Inscricao
             {
@@ -256,26 +256,26 @@ namespace API.Service
 
             _logger.LogInformation($"Time {time.Nome} inscrito no campeonato {campeonato.Nome} pelo usuário {usuarioId}.");
 
-            return result.Id;
+            return AuthResult<int>.SuccessResult(result.Id);
         }
 
-        public async Task<bool> RejeitarInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken)
+        public async Task<AuthResult<bool>> RejeitarInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken)
         {
             var atualizado = await _inscricaoRepository.UpdateStatusInscricaoAsync(inscricaoId, StatusInscricao.Cancelado, cancellationToken);
 
             if (!atualizado)
-                throw new KeyNotFoundException("Inscrição não encontrada ou já processada.");
+                return AuthResult<bool>.FailureResult("Inscrição não encontrada ou já processada.", 404);
 
             _logger.LogInformation($"Inscrição {inscricaoId} rejeitada pelo admin {adminUserId}.");
 
-            return true;
+            return AuthResult<bool>.SuccessResult(true);
         }
 
-        public async Task<bool> RemoverInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken)
+        public async Task<AuthResult<bool>> RemoverInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken)
         {
             var inscricao = await _inscricaoRepository.GetByIdAsync(inscricaoId, cancellationToken);
             if (inscricao == null)
-                throw new KeyNotFoundException("Inscrição não encontrada.");
+                return AuthResult<bool>.FailureResult("Inscrição não encontrada.", 404);
 
             if (inscricao.Status == StatusInscricao.Campeao)
             {
@@ -295,7 +295,7 @@ namespace API.Service
 
             _logger.LogInformation($"Inscrição {inscricaoId} removida pelo admin {adminUserId}.");
 
-            return true;
+            return AuthResult<bool>.SuccessResult(true);
 
         }
     }

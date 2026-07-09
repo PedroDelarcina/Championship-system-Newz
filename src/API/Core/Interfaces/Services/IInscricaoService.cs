@@ -1,4 +1,5 @@
 ﻿using Core.DTOs.Inscricao;
+using Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,12 +12,12 @@ namespace Core.Interfaces.Services
       //  Task<InscricaoResponseDto?> ObterInscricaoPorIdAsync(int id, string usuarioLogadoId, CancellationToken cancellationToken);
         Task<IEnumerable<InscricaoListDto>> ObterMinhasInscricoesAsync(string usuarioId, CancellationToken cancellationToken);
         Task<IEnumerable<InscricaoListDto>> ObterInscricoesCampeonatoAsync(int campeonatoId, CancellationToken cancellationToken);
-        Task<int> InscreverTimeCampeonatoAsync(InscricaoRequestDto inscricaoRequestDto, string usuarioId, CancellationToken cancellationToken);
-        Task<bool> CancelarInscricaoAsync(int inscricaoId, string usuarioId, CancellationToken cancellationToken);
-        Task<bool> AprovarInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
-        Task<bool> RejeitarInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
-        Task<bool> EliminarTimeAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
-        Task<bool> DefinirCampeonatoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
-        Task<bool> RemoverInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
+        Task<AuthResult<int>> InscreverTimeCampeonatoAsync(InscricaoRequestDto inscricaoRequestDto, string usuarioId, CancellationToken cancellationToken);
+        Task<AuthResult<bool>> CancelarInscricaoAsync(int inscricaoId, string usuarioId, CancellationToken cancellationToken);
+        Task<AuthResult<bool>> AprovarInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
+        Task<AuthResult<bool>> RejeitarInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
+        Task<AuthResult<bool>> EliminarTimeAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
+        Task<AuthResult<bool>> DefinirCampeonatoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
+        Task<AuthResult<bool>> RemoverInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
     }
 }

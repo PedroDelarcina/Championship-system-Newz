@@ -47,22 +47,23 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Registro([FromBody] RegistroDto registroDto)
         {
-            try
+            var result = await _authService.RegistroAsync(registroDto);
+            if (!result.Success)
             {
-                var result = await _authService.RegistroAsync(registroDto);
-                if (!result.Success)
+                return StatusCode(result.StatusCode, new
                 {
-                    return BadRequest(new { message = result.Message, errors = result.Errors });
-                }
+                   message = result.Message,
+                   errors = result.Errors
+                });
+            }
 
-                return Ok(new { message = "Usuário registrado com sucesso" });
-            }
-            catch (Exception ex)
+            return Ok(new
             {
-                _logger.LogError(ex, "Erro ao registrar usuário");
-                return StatusCode(500, new { message = "Ocorreu um erro ao registrar o usuário" });
-            }
+                message = result.Message,
+                data = result.Data
+            });
         }
+
 
 
         [HttpPost("Login")]
