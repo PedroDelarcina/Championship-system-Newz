@@ -17,30 +17,16 @@ namespace API.Controllers
     public class AuthController : BaseController
     {
 
-        private readonly UserManager<Usuario> _userManager;
-        private readonly SignInManager<Usuario> _signInManager;
-        private readonly TokenService _tokenService;
         private readonly IAuthService _authService;
-        private readonly ILogger<AuthController> _logger;
         private readonly AppDbContext _dbContext;
-        private readonly IEmailService _emailService;
 
         public AuthController(
-            SignInManager<Usuario> signInManager,
-            UserManager<Usuario> userManager,
             IAuthService authService,
-            TokenService tokenService,
-            ILogger<AuthController> logger,
-            AppDbContext dbContext,
-            IEmailService emailService)
+            AppDbContext dbContext
+            )
         {
-            _signInManager = signInManager;
-            _userManager = userManager;
-            _tokenService = tokenService;
             _authService = authService;
-            _logger = logger;
             _dbContext = dbContext;
-            _emailService = emailService;
         }
 
 

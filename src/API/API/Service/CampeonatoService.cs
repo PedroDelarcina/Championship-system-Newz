@@ -99,7 +99,7 @@ namespace API.Service
 
             _logger.LogInformation($"Campeonato {(campeonato.IsAtivo ? "ativado" : "desativado")} por admin {adminUserId}");
 
-            return AuthResult<bool>.SuccessResult(true);
+            return AuthResult<bool>.SuccessResult(true, "Status alterado com sucesso!");
         }
 
         public async Task<AuthResult<bool>> AtualizarCampeonatoAsync(int id, CampeonatoRequestDto requestDto, string adminUserId, CancellationToken cancellationToken)
@@ -111,7 +111,7 @@ namespace API.Service
             if (requestDto.DataInicio >= requestDto.DataFim)
                 return AuthResult<bool>.FailureResult("Data de início deve ser inferior à data de fim", 400);
 
-            var conflito = await _campeonatoRepository.ExisteCampeonatosAtivosAsync(requestDto.DataInicio, requestDto.DataFim, null, cancellationToken);
+            var conflito = await _campeonatoRepository.ExisteCampeonatosAtivosAsync(requestDto.DataInicio, requestDto.DataFim, id, cancellationToken);
             if (conflito)
                 return AuthResult<bool>.FailureResult("Já existe outro campeonato ativo nesse período", 400);
 
@@ -126,7 +126,7 @@ namespace API.Service
             await _campeonatoRepository.UpdateAsync(campeonato, cancellationToken);
             _logger.LogInformation($"Campeonato atualizado: {campeonato.Nome} por admin {adminUserId}");
 
-            return AuthResult<bool>.SuccessResult(true);
+            return AuthResult<bool>.SuccessResult(true, "Campeonato atualizado com sucesso.");
         }
 
         public async Task<AuthResult<int>> CriarCampeonatoAsync(CampeonatoRequestDto requestDto, string adminUserId, CancellationToken cancellationToken)
@@ -171,7 +171,7 @@ namespace API.Service
             await _campeonatoRepository.DeleteAsync(campeonato, cancellationToken);
             _logger.LogInformation($"Campeonato deletado: {campeonato.Nome} por admin {adminUserId}");
 
-            return AuthResult<bool>.SuccessResult(true);
+            return AuthResult<bool>.SuccessResult(true, "Campeonato deletado com sucesso!");
         }
 
     }

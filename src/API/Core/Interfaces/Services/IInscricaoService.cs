@@ -17,7 +17,7 @@ namespace Core.Interfaces.Services
         Task<AuthResult<bool>> AprovarInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
         Task<AuthResult<bool>> RejeitarInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
         Task<AuthResult<bool>> EliminarTimeAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
-        Task<AuthResult<bool>> DefinirCampeonatoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
+        Task<AuthResult<bool>> DefinirCampeaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
         Task<AuthResult<bool>> RemoverInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
     }
 }

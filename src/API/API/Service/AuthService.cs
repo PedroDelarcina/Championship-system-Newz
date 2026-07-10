@@ -78,7 +78,7 @@ namespace API.Service
                 Id = user.Id,
                 Email = user.Email,
                 NickName = user.NickName,
-                IsAdmin = user.IsAdmin,
+              //  IsAdmin = user.IsAdmin,
                 DataRegistro = user.DataRegistro
             }, "Usuário registrado com sucesso.");
         }

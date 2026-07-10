@@ -146,7 +146,7 @@ namespace API.Service
 
             _logger.LogInformation($"Inscrição {inscricaoId} aprovada pelo admin {adminUserId}.");
 
-            return AuthResult<bool>.SuccessResult(true);
+            return AuthResult<bool>.SuccessResult(true, "Inscrição aprovada com sucesso!");
         }
 
         public async Task<AuthResult<bool>> CancelarInscricaoAsync(int inscricaoId, string usuarioId, CancellationToken cancellationToken)
@@ -171,10 +171,10 @@ namespace API.Service
 
             _logger.LogInformation($"Inscrição {inscricaoId} cancelada pelo usuário {usuarioId}.");
 
-            return AuthResult<bool>.SuccessResult(true);
+            return AuthResult<bool>.SuccessResult(true, "Inscrição cancelada com sucesso!");
         }
 
-        public async Task<AuthResult<bool>> DefinirCampeonatoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken)
+        public async Task<AuthResult<bool>> DefinirCampeaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken)
         {
            var inscricao = await _inscricaoRepository.GetByIdAsync(inscricaoId, cancellationToken);
             if (inscricao == null)
@@ -203,7 +203,7 @@ namespace API.Service
 
             _logger.LogInformation($"Time eliminado do campeonato (inscrição {inscricaoId} eliminada pelo admin {adminUserId}).");
 
-            return AuthResult<bool>.SuccessResult(true);
+            return AuthResult<bool>.SuccessResult(true, "Time eliminado com sucesso!");
 
         }
 
@@ -268,7 +268,7 @@ namespace API.Service
 
             _logger.LogInformation($"Inscrição {inscricaoId} rejeitada pelo admin {adminUserId}.");
 
-            return AuthResult<bool>.SuccessResult(true);
+            return AuthResult<bool>.SuccessResult(true, "Inscrição rejeitada com sucesso!");
         }
 
         public async Task<AuthResult<bool>> RemoverInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken)
@@ -295,7 +295,7 @@ namespace API.Service
 
             _logger.LogInformation($"Inscrição {inscricaoId} removida pelo admin {adminUserId}.");
 
-            return AuthResult<bool>.SuccessResult(true);
+            return AuthResult<bool>.SuccessResult(true, "Inscrição removida com sucesso!");
 
         }
     }

@@ -1,5 +1,6 @@
-import axios from "axios";
+import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
 import { useAuthStore } from "@/stores/auth-store";
+import type { ApiResponse, TokenResponseDto, User } from "@/types/api";
 
 const defaultApiBase = "http://localhost:7180/api";
 
@@ -34,6 +35,110 @@ export function resolveAssetUrl(url?: string | null): string | undefined {
   }
   const origin = getApiOrigin();
   return `${origin}${url.startsWith("/") ? url : `/${url}`}`;
+}
+
+/** Detecta resposta no formato { message, data } do BaseController.FromResult. */
+export function isApiEnvelope(value: unknown): value is ApiResponse<unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "data" in value &&
+    "message" in value &&
+    typeof (value as ApiResponse<unknown>).message === "string"
+  );
+}
+
+/** Extrai `data` do envelope ou retorna o payload legado (migração gradual). */
+export function unwrapApiData<T>(payload: unknown): T {
+  if (isApiEnvelope(payload)) {
+    return payload.data as T;
+  }
+  return payload as T;
+}
+
+/** Normaliza qualquer resposta para o envelope tipado. */
+export function toApiResponse<T>(payload: unknown): ApiResponse<T> {
+  if (isApiEnvelope(payload)) {
+    return payload as ApiResponse<T>;
+  }
+  return { message: "", data: payload as T };
+}
+
+async function requestData<T>(
+  request: () => Promise<AxiosResponse<unknown>>,
+): Promise<T> {
+  const res = await request();
+  return unwrapApiData<T>(res.data);
+}
+
+async function requestFull<T>(
+  request: () => Promise<AxiosResponse<unknown>>,
+): Promise<ApiResponse<T>> {
+  const res = await request();
+  return toApiResponse<T>(res.data);
+}
+
+/** GET — retorna apenas `data` (compatível com envelope e formato legado). */
+export function apiGet<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+  return requestData<T>(() => api.get(url, config));
+}
+
+/** POST — retorna apenas `data`. */
+export function apiPost<T>(
+  url: string,
+  body?: unknown,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  return requestData<T>(() => api.post(url, body, config));
+}
+
+/** POST — retorna `{ message, data }` (útil para toasts de sucesso). */
+export function apiPostFull<T>(
+  url: string,
+  body?: unknown,
+  config?: AxiosRequestConfig,
+): Promise<ApiResponse<T>> {
+  return requestFull<T>(() => api.post(url, body, config));
+}
+
+/** PUT — retorna apenas `data`. */
+export function apiPut<T>(
+  url: string,
+  body?: unknown,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  return requestData<T>(() => api.put(url, body, config));
+}
+
+/** PATCH — retorna apenas `data` (ou void). */
+export function apiPatch<T>(
+  url: string,
+  body?: unknown,
+  config?: AxiosRequestConfig,
+): Promise<T> {
+  return requestData<T>(() => api.patch(url, body, config));
+}
+
+/** DELETE — retorna apenas `data` (ou void). */
+export function apiDelete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+  return requestData<T>(() => api.delete(url, config));
+}
+
+/** Mapeia TokenResponseDto → sessão do Zustand. */
+export function mapLoginToAuth(data: TokenResponseDto): {
+  token: string;
+  user: User;
+} {
+  return {
+    token: data.token,
+    user: {
+      id: data.userId,
+      email: data.email,
+      nickName: data.nickname,
+      isAdmin: data.isAdmin,
+      dataRegistro: new Date().toISOString(),
+    },
+  };
 }
 
 api.interceptors.request.use((config) => {
