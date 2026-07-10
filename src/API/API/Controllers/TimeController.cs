@@ -78,24 +78,10 @@ namespace API.Controllers
         [Authorize]
         public async Task<IActionResult> CriarTime([FromBody] TimeRequestDto timeRequestDto, CancellationToken cancellationToken)
         {
-            try
-            {
-                var userId = GetUserId();
+           var userId = GetUserId();
 
-                var timeId = await _timeService.CriarTimeAsync(timeRequestDto, userId, cancellationToken);
-
-
-                return Ok(new { message = "Time criado com sucesso", id = timeId });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao criar time");
-                return StatusCode(500, new { message = "Erro interno ao processar a solicitação" });
-            }
+           var result = await _timeService.CriarTimeAsync(timeRequestDto, userId, cancellationToken);
+           return FromResult(result);
         }
 
 
@@ -105,31 +91,11 @@ namespace API.Controllers
         [HttpPost("adicionar-jogador")]
         public async Task<IActionResult> AdicionarPlayerTime([FromBody] AddPlayerTimeDto addPlayerTimeDto, CancellationToken cancellationToken)
         {
-            try
-            {
-                var userId = GetUserId();
 
-                var time = await _timeService.AdicionarPlayerTimeAsync(addPlayerTimeDto, userId, cancellationToken);
+           var userId = GetUserId();
 
-                return Ok(new { message = "Jogador adicionado ao time com sucesso" });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                 return Forbid();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao adicionar jogador ao time");
-                return StatusCode(500, new { message = "Erro interno ao processar a solicitação" });
-            }
+           var result = await _timeService.AdicionarPlayerTimeAsync(addPlayerTimeDto, userId, cancellationToken);
+           return FromResult(result);
         }
 
 
@@ -139,36 +105,10 @@ namespace API.Controllers
         [HttpDelete("{timeId}/remover-jogador/{playerId}")]
         public async Task<IActionResult> RemoverPlayerTime(int timeId, string playerId, CancellationToken cancellationToken)
         {
-            try
-            {
-                var usuarioLogadoId = GetUserId();
+           var usuarioLogadoId = GetUserId();
 
-                var removido = await _timeService.RemoverPlayerTimeAsync(timeId, playerId, usuarioLogadoId, cancellationToken);
-                if (!removido)
-                {
-                    return NotFound(new { message = "Time ou jogador não encontrado" });
-                }
-              
-                return Ok(new { message = "Jogador removido com sucesso" });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Forbid();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao remover jogador do time");
-                return StatusCode(500, new { message = "Erro interno ao processar a solicitação" });
-
-            }
+           var result = await _timeService.RemoverPlayerTimeAsync(timeId, playerId, usuarioLogadoId, cancellationToken);              
+           return FromResult(result);
         }
 
 
@@ -178,35 +118,11 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletarTime (int id, CancellationToken cancellationToken)
         {
-            try
-            {
-                var usuarioLogadoId = GetUserId();
-                var isAdmin = IsUserAdmin();
+           var usuarioLogadoId = GetUserId();
+           var isAdmin = IsUserAdmin();
 
-                var deletado = await _timeService.DeletarTimeAsync(id, usuarioLogadoId, cancellationToken);
-
-                if (!deletado)
-                    return NotFound("Time não encontrado");
-
-                return Ok(new { message = "Time deletado com sucesso! " });
-
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Forbid();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Falha ao tentar deletar esse time", ex);
-            }
+           var result = await _timeService.DeletarTimeAsync(id, usuarioLogadoId, cancellationToken);                   
+           return FromResult(result);
         }
     }
 }

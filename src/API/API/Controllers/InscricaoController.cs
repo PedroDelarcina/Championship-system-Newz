@@ -139,32 +139,10 @@ namespace API.Controllers
         [Authorize]
         public async Task<IActionResult> InscreverTimeCampeonato([FromBody] InscricaoRequestDto inscricaoRequestDto, CancellationToken cancellationToken)
         {
-            try
-            {
-                var usuarioId = GetUserId();
+            var usuarioId = GetUserId();
 
-                var inscricaoId = await _inscricaoService.InscreverTimeCampeonatoAsync(inscricaoRequestDto, usuarioId, cancellationToken);
-               
-
-                return Ok(new { message = "Inscrição realizada com sucesso! Aguardando aprovação do admin", inscricaoId });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Forbid(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao realizar inscrição");
-                return StatusCode(500, new { message = "Ocorreu um erro ao realizar a inscrição" });
-            }
+            var result = await _inscricaoService.InscreverTimeCampeonatoAsync(inscricaoRequestDto, usuarioId, cancellationToken);
+            return FromResult(result);
         }
 
         /// <summary>
@@ -173,33 +151,12 @@ namespace API.Controllers
         [HttpDelete("{inscricaoId}/cancelarInscricao")]
         public async Task<IActionResult> CancelarInscricao(int inscricaoId, CancellationToken cancellationToken)
         {
-            try
-            {
-                var userId = GetUserId();
-                var isAdmin = IsUserAdmin();
 
-                var inscricao = await _inscricaoService.CancelarInscricaoAsync(inscricaoId, userId, cancellationToken);
-              
+            var userId = GetUserId();
+            var isAdmin = IsUserAdmin();
 
-                return Ok(new { message = "Inscrição cancelada com sucesso" });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Forbid(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao cancelar inscrição");
-                return StatusCode(500, new { message = "Ocorreu um erro ao cancelar a inscrição" });
-            }
+            var result = await _inscricaoService.CancelarInscricaoAsync(inscricaoId, userId, cancellationToken);
+            return FromResult(result);
         }
 
         /// <summary>
@@ -209,23 +166,11 @@ namespace API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AprovarInscricao(int inscricaoId, CancellationToken cancellationToken)
         {
-            try
-            {
-                var adminUserId = GetUserId();
 
-                await _inscricaoService.AprovarInscricaoAsync(inscricaoId, adminUserId, cancellationToken);
+            var adminUserId = GetUserId();
 
-                return Ok(new { message = "Inscrição aprovada com sucesso" });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao aprovar inscrição");
-                return StatusCode(500, new { message = "Erro interno ao processar solicitação" });
-            }
+            var result = await _inscricaoService.AprovarInscricaoAsync(inscricaoId, adminUserId, cancellationToken);
+            return FromResult(result);
         }
 
 
@@ -236,23 +181,10 @@ namespace API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RejeitarInscricao(int inscricaoId, CancellationToken cancellationToken)
         {
-            try
-            {
-                var adminUserId = GetUserId();
+            var adminUserId = GetUserId();
 
-                await _inscricaoService.RejeitarInscricaoAsync(inscricaoId, adminUserId, cancellationToken);
-
-                return Ok(new { message = "Inscrição rejeitada com sucesso" });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao rejeitar inscrição");
-                return StatusCode(500, new { message = "Erro interno ao processar solicitação" });
-            }
+            var result = await _inscricaoService.RejeitarInscricaoAsync(inscricaoId, adminUserId, cancellationToken);
+            return FromResult(result);
         }
 
 
@@ -263,24 +195,12 @@ namespace API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> EliminarTime(int inscricaoId, CancellationToken cancellationToken)
         {
-            try
-            {
-                var adminUserId = GetUserId();
 
-                await _inscricaoService.EliminarTimeAsync(inscricaoId, adminUserId, cancellationToken);
+            var adminUserId = GetUserId();
 
-                return Ok(new { message = "Time eliminado do campeonato" });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao eliminar time");
-                return StatusCode(500, new { message = "Erro interno ao processar solicitação" });
-            }
-        } 
+            var result = await _inscricaoService.EliminarTimeAsync(inscricaoId, adminUserId, cancellationToken);
+            return FromResult(result);
+        }
 
         /// <summary>
         /// Setar um time como campeão (apenas admin)
@@ -289,24 +209,11 @@ namespace API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DefinirCampeao(int inscricaoId, CancellationToken cancellationToken)
         {
-            try
-            {
-                var adminUserId = GetUserId();
 
-                await _inscricaoService.DefinirCampeonatoAsync(inscricaoId, adminUserId, cancellationToken);
+            var adminUserId = GetUserId();
 
-
-                return Ok(new { message = "Time definido como campeão do campeonato!" });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao eliminar time");
-                return StatusCode(500, new { message = "Erro interno ao processar solicitação" });
-            }
+            var result = await _inscricaoService.DefinirCampeaoAsync(inscricaoId, adminUserId, cancellationToken);
+            return FromResult(result);
         }
 
 
@@ -317,23 +224,11 @@ namespace API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RemoverInscricao(int inscricaoId, CancellationToken cancellationToken)
         {
-            try
-            {
-                var adminUserId = GetUserId();
 
-                var inscricao = await _inscricaoService.RemoverInscricaoAsync(inscricaoId, adminUserId,cancellationToken);
+            var adminUserId = GetUserId();
 
-                return Ok(new { message = "Inscrição removida permanentemente. Agora o time pode ser deletado." });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao eliminar time");
-                return StatusCode(500, new { message = "Erro interno ao processar solicitação" });
-            }
+            var result = await _inscricaoService.RemoverInscricaoAsync(inscricaoId, adminUserId,cancellationToken);
+            return FromResult(result);
         }
 
     }

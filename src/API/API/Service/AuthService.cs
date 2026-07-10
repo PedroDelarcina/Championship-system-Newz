@@ -38,11 +38,11 @@ namespace API.Service
         {
             var existingUserEmail = await _userManager.FindByEmailAsync(registroDto.Email);
             if (existingUserEmail != null)
-                return AuthResult<UsuarioResponseDto>.FailureResult("Email já registrado.");
+                return AuthResult<UsuarioResponseDto>.FailureResult("Email já registrado.", 409);
 
             var existingNickName = _userManager.Users.Any(u => u.NickName == registroDto.Nickname);
             if (existingNickName)
-                return AuthResult<UsuarioResponseDto>.FailureResult("Nickname já registrado.");
+                return AuthResult<UsuarioResponseDto>.FailureResult("Nickname já registrado.", 409);
 
             var user = new Usuario
             {
@@ -60,7 +60,7 @@ namespace API.Service
             {
                 var errors = result.Errors.Select(e => e.Description);
 
-                return AuthResult<UsuarioResponseDto>.FailureResult("Falha ao registrar usuário.", errors);
+                return AuthResult<UsuarioResponseDto>.FailureResult("Falha ao registrar usuário.", 400);
             }
 
             var roleResult = await _userManager.AddToRoleAsync(user, "User");
@@ -68,7 +68,7 @@ namespace API.Service
             {
                 var errors = roleResult.Errors.Select(e => e.Description);
 
-                return AuthResult<UsuarioResponseDto>.FailureResult("Erro ao adicionar usuário à role.", errors);
+                return AuthResult<UsuarioResponseDto>.FailureResult("Erro ao adicionar usuário à role.", 500);
             }
 
             _logger.LogInformation("Novo usuário registrado: {Email}", user.Email);
@@ -78,7 +78,7 @@ namespace API.Service
                 Id = user.Id,
                 Email = user.Email,
                 NickName = user.NickName,
-                IsAdmin = user.IsAdmin,
+              //  IsAdmin = user.IsAdmin,
                 DataRegistro = user.DataRegistro
             }, "Usuário registrado com sucesso.");
         }
@@ -87,12 +87,12 @@ namespace API.Service
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
 
             if (user == null)
-                return AuthResult<TokenResponseDto>.FailureResult("Email ou senha inválidos.");
+                return AuthResult<TokenResponseDto>.FailureResult("Email ou senha inválidos.", 401);
 
             var resultPassword = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
 
             if (!resultPassword.Succeeded)
-                return AuthResult<TokenResponseDto>.FailureResult("Email ou senha inválidos.");
+                return AuthResult<TokenResponseDto>.FailureResult("Email ou senha inválidos.", 401);
 
             var token = _tokenService.GenerateUserToken(user, cancellationToken);
 
@@ -112,12 +112,12 @@ namespace API.Service
         public async Task<AuthResult<UsuarioResponseDto>> UsuarioLogadoAsync(string userId)
         {
             if (string.IsNullOrEmpty(userId))
-                return AuthResult<UsuarioResponseDto>.FailureResult("Usuário não autenticado");
+                return AuthResult<UsuarioResponseDto>.FailureResult("Usuário não autenticado", 403);
 
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
-                return AuthResult<UsuarioResponseDto>.FailureResult("Usuário não encontrado");
+                return AuthResult<UsuarioResponseDto>.FailureResult("Usuário não encontrado", 404);
 
             return AuthResult<UsuarioResponseDto>.SuccessResult(new UsuarioResponseDto
             {
@@ -133,14 +133,14 @@ namespace API.Service
         { 
             var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
             if (user == null)
-                return AuthResult<bool>.FailureResult("Token inválido ou usuário não encontrado.");
+                return AuthResult<bool>.FailureResult("Token inválido ou usuário não encontrado.", 404);
 
             var result = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.NewPassword);
 
             if(!result.Succeeded)
             {
                 var errors = result.Errors.Select(e => e.Description);
-                return AuthResult<bool>.FailureResult("Falha ao resetar senha.", errors);
+                return AuthResult<bool>.FailureResult("Falha ao resetar senha.", 400);
             }
 
             return AuthResult<bool>.SuccessResult(true, "Senha resetada com sucesso.");
@@ -157,7 +157,7 @@ namespace API.Service
             var resetPasswordUrl = _configuration["FrontEnd:ResetPasswordUrl"];
 
             if(string.IsNullOrEmpty(resetPasswordUrl))
-                return AuthResult<bool>.FailureResult("URL de reset de senha não configurada.");
+                return AuthResult<bool>.FailureResult("URL de reset de senha não configurada.", 500);
 
             var resetLink = $"{resetPasswordUrl}?email={Uri.EscapeDataString(user.Email!)}&token={Uri.EscapeDataString(token)}";
 

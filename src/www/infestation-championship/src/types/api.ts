@@ -1,3 +1,9 @@
+/** Envelope padrão do backend (AuthResult + BaseController.FromResult). */
+export interface ApiResponse<T> {
+  message: string;
+  data: T;
+}
+
 export interface UsuarioResponseDto {
   id: string;
   email: string;
@@ -15,6 +21,7 @@ export interface TokenResponseDto {
   isAdmin: boolean;
 }
 
+/** @deprecated Use ApiResponse<UsuarioResponseDto> após migração do backend. */
 export interface RegistroResponseDto {
   message: string;
   user: UsuarioResponseDto;
@@ -43,6 +50,7 @@ export interface ResetPasswordDto {
   newPassword: string;
 }
 
+/** @deprecated Use ApiResponse<boolean> para mutações que só retornam sucesso. */
 export interface MessageResponseDto {
   message: string;
 }
