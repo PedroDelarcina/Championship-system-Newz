@@ -87,12 +87,12 @@ namespace API.Service
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
 
             if (user == null)
-                return AuthResult<TokenResponseDto>.FailureResult("Email ou senha inválidos.");
+                return AuthResult<TokenResponseDto>.FailureResult("Email ou senha inválidos.", 401);
 
             var resultPassword = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
 
             if (!resultPassword.Succeeded)
-                return AuthResult<TokenResponseDto>.FailureResult("Email ou senha inválidos.");
+                return AuthResult<TokenResponseDto>.FailureResult("Email ou senha inválidos.", 401);
 
             var token = _tokenService.GenerateUserToken(user, cancellationToken);
 
@@ -112,12 +112,12 @@ namespace API.Service
         public async Task<AuthResult<UsuarioResponseDto>> UsuarioLogadoAsync(string userId)
         {
             if (string.IsNullOrEmpty(userId))
-                return AuthResult<UsuarioResponseDto>.FailureResult("Usuário não autenticado");
+                return AuthResult<UsuarioResponseDto>.FailureResult("Usuário não autenticado", 403);
 
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
-                return AuthResult<UsuarioResponseDto>.FailureResult("Usuário não encontrado");
+                return AuthResult<UsuarioResponseDto>.FailureResult("Usuário não encontrado", 404);
 
             return AuthResult<UsuarioResponseDto>.SuccessResult(new UsuarioResponseDto
             {
