@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import {
   statusCampeonatoKind,
@@ -12,9 +13,10 @@ export function StatusBadge({
   status: StatusCampeonato | undefined;
   className?: string;
 }) {
+  const { t } = useTranslation();
   const raw = status ?? "NaoIniciado";
   const kind = statusCampeonatoKind(raw);
-  const label = statusCampeonatoLabel(raw);
+  const label = statusCampeonatoLabel(raw, t);
   const styles: Record<string, string> = {
     open: "bg-status-open text-obsidian shadow-[0_0_10px_oklch(0.78_0.22_145/0.5)]",
     running:

@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { format, parseISO } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import type { Locale } from "date-fns";
 import { Calendar, Trophy, Users, Award, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import {
   useCampeonato,
   useInscreverCampeonato,
@@ -13,6 +14,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { TeamLogo } from "@/components/team-logo";
 import { ErrorBox, PageLoader } from "@/components/ui-blocks";
 import { getApiErrorMessage } from "@/lib/api";
+import { getDateLocale } from "@/lib/date-locale";
 import { useAuthStore } from "@/stores/auth-store";
 import { statusCampeonatoKind, statusInscricaoLabel } from "@/lib/status";
 
@@ -31,22 +33,24 @@ export const Route = createFileRoute("/campeonatos/$id")({
   component: CampeonatoDetalhePage,
 });
 
-function safeFormat(d?: string) {
+function safeFormat(d: string | undefined, locale: Locale) {
   if (!d) return "—";
   try {
-    return format(parseISO(d), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+    return format(parseISO(d), "PPP", { locale });
   } catch {
     return "—";
   }
 }
 
 function CampeonatoDetalhePage() {
+  const { t, i18n } = useTranslation();
   const { id } = Route.useParams();
   const router = useRouter();
   const { data: c, isLoading, error } = useCampeonato(id);
   const { user } = useAuthStore();
   const { data: meusTimes } = useMeusTimes();
   const inscrever = useInscreverCampeonato();
+  const dateLocale = getDateLocale(i18n.language);
 
   if (isLoading) {
     return (
@@ -59,14 +63,14 @@ function CampeonatoDetalhePage() {
     return (
       <div className="max-w-3xl mx-auto px-6 pt-32">
         <ErrorBox
-          message={error ? getApiErrorMessage(error) : "Campeonato não encontrado"}
+          message={error ? getApiErrorMessage(error) : t("tournaments.notFound")}
           action={
             <CyberButton
               variant="secondary"
               size="sm"
               onClick={() => router.invalidate()}
             >
-              Tentar novamente
+              {t("common.tryAgain")}
             </CyberButton>
           }
         />
@@ -106,7 +110,7 @@ function CampeonatoDetalhePage() {
         campeonatoId: Number(c.id),
         timeId: Number(meuTime?.id),
       });
-      toast.success("Inscrição enviada! Aguardando aprovação.");
+      toast.success(t("tournaments.registrationSent"));
     } catch (e) {
       toast.error(getApiErrorMessage(e));
     }
@@ -123,7 +127,7 @@ function CampeonatoDetalhePage() {
             to="/campeonatos"
             className="text-xs uppercase tracking-widest text-muted-foreground hover:text-white mb-4 inline-block"
           >
-            ← Voltar para campeonatos
+            {t("tournaments.backToList")}
           </Link>
           <div className="flex flex-wrap items-center gap-3 mb-3">
             <StatusBadge status={c.status} />
@@ -143,7 +147,7 @@ function CampeonatoDetalhePage() {
           {c.descricaoRegras && (
             <section>
               <h2 className="font-display text-2xl uppercase mb-3 text-blood-bright">
-                Regras
+                {t("tournaments.rules")}
               </h2>
               <div className="cyber-cut-br bg-obsidian-light border border-obsidian-border p-6">
                 <pre className="text-sm text-muted-foreground whitespace-pre-wrap font-tech leading-relaxed">
@@ -155,7 +159,7 @@ function CampeonatoDetalhePage() {
           {c.regrasExtras && (
             <section>
               <h2 className="font-display text-2xl uppercase mb-3 text-blood-bright">
-                Regras Extras
+                {t("tournaments.extraRules")}
               </h2>
               <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
                 {c.regrasExtras}
@@ -167,11 +171,13 @@ function CampeonatoDetalhePage() {
           <section>
             <h2 className="font-display text-2xl uppercase mb-3 text-blood-bright flex items-center gap-2">
               <Users className="size-5" />
-              Times Inscritos ({c.inscricoes?.length ?? 0})
+              {t("tournaments.registeredTeams", {
+                count: c.inscricoes?.length ?? 0,
+              })}
             </h2>
             {!c.inscricoes || c.inscricoes.length === 0 ? (
               <p className="text-muted-foreground text-sm uppercase tracking-wider">
-                Nenhum time inscrito ainda.
+                {t("tournaments.noRegisteredTeams")}
               </p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -196,7 +202,7 @@ function CampeonatoDetalhePage() {
                           </p>
                         )}
                         <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                          {statusInscricaoLabel(i.status)}
+                          {statusInscricaoLabel(i.status, t)}
                         </p>
                       </div>
                     </div>
@@ -215,7 +221,7 @@ function CampeonatoDetalhePage() {
           <div className="cyber-cut-br bg-obsidian-light border border-obsidian-border border-l-4 border-l-blood-bright p-6 space-y-4">
             <div>
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1 flex items-center gap-1">
-                <Users className="size-3" /> Inscritos
+                <Users className="size-3" /> {t("tournaments.registeredCount")}
               </p>
               <p className="font-display text-4xl">
                 {totalInscritos}
@@ -223,22 +229,22 @@ function CampeonatoDetalhePage() {
             </div>
             <div className="border-t border-obsidian-border pt-4">
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1 flex items-center gap-1">
-                <Calendar className="size-3" /> Início
+                <Calendar className="size-3" /> {t("tournaments.start")}
               </p>
-              <p className="font-bold">{safeFormat(c.dataInicio)}</p>
+              <p className="font-bold">{safeFormat(c.dataInicio, dateLocale)}</p>
             </div>
             {c.dataFim && (
               <div className="border-t border-obsidian-border pt-4">
                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1 flex items-center gap-1">
-                  <Calendar className="size-3" /> Fim
+                  <Calendar className="size-3" /> {t("tournaments.end")}
                 </p>
-                <p className="font-bold">{safeFormat(c.dataFim)}</p>
+                <p className="font-bold">{safeFormat(c.dataFim, dateLocale)}</p>
               </div>
             )}
             {c.campeao && (
               <div className="border-t border-obsidian-border pt-4">
                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1 flex items-center gap-1">
-                  <Trophy className="size-3" /> Campeão atual
+                  <Trophy className="size-3" /> {t("tournaments.currentChampion")}
                 </p>
                 <p className="font-bold text-status-open">{c.campeao}</p>
               </div>
@@ -248,7 +254,7 @@ function CampeonatoDetalhePage() {
           {/* CTA contextual */}
           {kind === "disabled" && (
             <div className="cyber-cut bg-destructive/10 border border-destructive/40 p-4 text-center text-xs text-destructive uppercase tracking-wider font-bold">
-              Campeonato desativado pelo administrador — inscrições indisponíveis.
+              {t("tournaments.disabledByAdmin")}
             </div>
           )}
           {!user && (
@@ -256,7 +262,7 @@ function CampeonatoDetalhePage() {
               to="/login"
               className="cyber-cut block text-center bg-blood text-white font-bold uppercase tracking-widest text-sm px-6 py-4 hover:bg-blood-bright transition-colors glow-blood"
             >
-              Entrar para inscrever time
+              {t("tournaments.loginToRegister")}
             </Link>
           )}
           {user && !meuTime && (
@@ -264,18 +270,18 @@ function CampeonatoDetalhePage() {
               to="/meus-times/novo"
               className="cyber-cut block text-center bg-blood text-white font-bold uppercase tracking-widest text-sm px-6 py-4 hover:bg-blood-bright transition-colors glow-blood"
             >
-              Criar time para participar
+              {t("tournaments.createTeamToJoin")}
             </Link>
           )}
           {user && meuTime && !souLider && (
             <div className="cyber-cut bg-obsidian-light border border-obsidian-border p-4 text-center text-xs text-muted-foreground uppercase tracking-wider flex items-center justify-center gap-2">
               <ShieldCheck className="size-4" />
-              Apenas o líder pode inscrever o time
+              {t("tournaments.leaderOnlyRegister")}
             </div>
           )}
           {jaInscrito && (
             <div className="cyber-cut bg-status-open/10 border border-status-open p-4 text-center text-xs text-status-open uppercase tracking-wider font-bold">
-              Seu time já está inscrito
+              {t("tournaments.alreadyRegistered")}
             </div>
           )}
           {podeInscrever && (
@@ -285,7 +291,7 @@ function CampeonatoDetalhePage() {
               onClick={handleInscrever}
               className="w-full"
             >
-              Inscrever Time
+              {t("tournaments.registerTeam")}
             </CyberButton>
           )}
         </aside>

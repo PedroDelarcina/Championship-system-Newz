@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Plus, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useMeusTimes } from "@/hooks/api";
 import {
   EmptyState,
@@ -39,6 +40,7 @@ function MeusTimesLayout() {
 }
 
 function MeusTimesLista() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const token = useAuthStore((s) => s.token);
   const { user } = useAuthStore();
@@ -53,9 +55,9 @@ function MeusTimesLista() {
   return (
     <section className="max-w-[1440px] mx-auto px-6 pb-20">
       <PageHeader
-        eyebrow="Roster"
-        title="Meus Times"
-        description="Gerencie seu squad. Você pode pertencer a apenas um time."
+        eyebrow={t("teams.roster")}
+        title={t("teams.title")}
+        description={t("teams.description")}
         actions={
           (!data || data.length === 0) ? (
             <Link
@@ -63,7 +65,7 @@ function MeusTimesLista() {
               className="cyber-cut bg-blood text-white font-bold uppercase tracking-widest text-sm px-6 py-3 hover:bg-blood-bright transition-colors glow-blood inline-flex items-center gap-2"
             >
               <Plus className="size-4" />
-              Criar Time
+              {t("teams.createTeam")}
             </Link>
           ) : undefined
         }
@@ -79,21 +81,21 @@ function MeusTimesLista() {
               size="sm"
               onClick={() => window.location.reload()}
             >
-              Tentar novamente
+              {t("common.tryAgain")}
             </CyberButton>
           }
         />
       )}
       {!isLoading && !error && (!data || data.length === 0) && (
         <EmptyState
-          title="Você ainda não tem time"
-          description="Crie um time para se inscrever em campeonatos."
+          title={t("teams.noTeamYet")}
+          description={t("teams.noTeamYetDesc")}
           action={
             <Link
               to="/meus-times/novo"
               className="cyber-cut bg-blood text-white font-bold uppercase tracking-widest text-sm px-6 py-3 hover:bg-blood-bright transition-colors glow-blood inline-flex items-center gap-2"
             >
-              <Plus className="size-4" /> Criar meu time
+              <Plus className="size-4" /> {t("teams.createMyTeam")}
             </Link>
           }
         />
@@ -101,42 +103,42 @@ function MeusTimesLista() {
 
       {data && data.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {data.map((t) => {
-            const souLider = String(t.liderId) === String(user?.id);
+          {data.map((team) => {
+            const souLider = String(team.liderId) === String(user?.id);
             return (
               <Link
-                key={t.id}
+                key={team.id}
                 to="/meus-times/$id"
-                params={{ id: String(t.id) }}
+                params={{ id: String(team.id) }}
                 className="cyber-cut-br bg-obsidian-light border border-obsidian-border border-l-4 border-l-blood-bright p-6 flex flex-col gap-4 hover:bg-obsidian-border/40 transition-colors group"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4 min-w-0">
-                    <TeamLogo url={t.logoUrl} name={t.nome} size={56} />
+                    <TeamLogo url={team.logoUrl} name={team.nome} size={56} />
                     <div className="min-w-0">
-                      {t.clanTag && (
+                      {team.clanTag && (
                         <p className="text-blood-bright font-bold tracking-widest uppercase text-xs mb-1">
-                          [{t.clanTag}]
+                          [{team.clanTag}]
                         </p>
                       )}
                       <h3 className="font-display text-3xl uppercase font-bold leading-none">
-                        {t.nome}
+                        {team.nome}
                       </h3>
                     </div>
                   </div>
                   {souLider && (
                     <span className="cyber-badge bg-blood-bright text-white px-3 py-1 text-[10px] font-bold uppercase tracking-widest">
-                      Líder
+                      {t("teams.leader")}
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-6 mt-auto pt-4 border-t border-obsidian-border text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground uppercase tracking-wider text-xs">
-                    <Users className="size-4" /> {t.totalJogadores}{" "}
-                    jogadores
+                    <Users className="size-4" /> {team.totalJogadores}{" "}
+                    {t("teams.players")}
                   </div>
                   <div className="text-blood-bright font-bold uppercase tracking-widest text-xs ml-auto group-hover:translate-x-1 transition-transform">
-                    Gerenciar →
+                    {t("teams.manage")}
                   </div>
                 </div>
               </Link>

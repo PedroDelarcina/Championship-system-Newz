@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import {
   statusInscricaoKind,
@@ -12,8 +13,9 @@ export function InscricaoStatusBadge({
   status: StatusInscricao;
   className?: string;
 }) {
+  const { t } = useTranslation();
   const kind = statusInscricaoKind(status);
-  const label = statusInscricaoLabel(status);
+  const label = statusInscricaoLabel(status, t);
   const styles: Record<string, string> = {
     pending:
       "bg-amber-500/15 border border-amber-500/50 text-amber-400",
