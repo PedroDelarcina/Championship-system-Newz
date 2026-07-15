@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { AlertTriangle } from "lucide-react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useResetPassword } from "@/hooks/api";
 import { CyberInput } from "@/components/cyber-input";
 import { CyberButton } from "@/components/cyber-button";
@@ -31,32 +33,38 @@ export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
 });
 
-const passwordSchema = z
-  .string()
-  .min(6, "Mínimo 6 caracteres")
-  .max(100)
-  .regex(
-    /^(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{6,}$/,
-    "A senha deve ter no mínimo 6 caracteres, uma letra maiúscula e um caractere especial.",
-  );
-
-const schema = z
-  .object({
-    newPassword: passwordSchema,
-    confirmPassword: z.string(),
-  })
-  .refine((v) => v.newPassword === v.confirmPassword, {
-    message: "Senhas não conferem",
-    path: ["confirmPassword"],
-  });
-
-type FormData = z.infer<typeof schema>;
+type FormData = {
+  newPassword: string;
+  confirmPassword: string;
+};
 
 function ResetPasswordPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { email = "", token = "" } = Route.useSearch();
   const { mutateAsync, isPending } = useResetPassword();
   const linkInvalido = !email.trim() || !token.trim();
+
+  const schema = useMemo(
+    () =>
+      z
+        .object({
+          newPassword: z
+            .string()
+            .min(6, t("validation.minChars", { count: 6 }))
+            .max(100)
+            .regex(
+              /^(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{6,}$/,
+              t("validation.passwordComplexity"),
+            ),
+          confirmPassword: z.string(),
+        })
+        .refine((v) => v.newPassword === v.confirmPassword, {
+          message: t("validation.passwordsMismatch"),
+          path: ["confirmPassword"],
+        }),
+    [t],
+  );
 
   const {
     register,
@@ -66,7 +74,7 @@ function ResetPasswordPage() {
 
   const onSubmit = async (data: FormData) => {
     if (linkInvalido) {
-      toast.error("Link de recuperação inválido ou incompleto.");
+      toast.error(t("auth.invalidRecoveryLink"));
       return;
     }
 
@@ -76,7 +84,7 @@ function ResetPasswordPage() {
         token: token.trim(),
         newPassword: data.newPassword,
       });
-      toast.success(res.message || "Senha redefinida com sucesso!");
+      toast.success(res.message || t("auth.passwordResetSuccess"));
       navigate({ to: "/login" });
     } catch (e) {
       toast.error(getApiErrorMessage(e));
@@ -88,15 +96,15 @@ function ResetPasswordPage() {
       <div className="w-full max-w-md">
         <div className="cyber-cut-br bg-obsidian-light border border-obsidian-border border-l-4 border-l-blood-bright p-8 md:p-10">
           <p className="text-blood-bright font-bold tracking-[0.25em] uppercase text-xs mb-2">
-            Password Reset
+            {t("auth.passwordReset")}
           </p>
           <h1 className="font-display text-4xl md:text-5xl uppercase font-bold leading-none mb-3">
-            Nova senha
+            {t("auth.resetTitle")}
           </h1>
           <p className="text-sm text-muted-foreground uppercase tracking-wider mb-8">
-            Defina uma nova senha para{" "}
+            {t("auth.resetDescription")}{" "}
             <span className="text-white font-bold normal-case">
-              {email || "sua conta"}
+              {email || t("auth.yourAccount")}
             </span>
           </p>
 
@@ -104,14 +112,13 @@ function ResetPasswordPage() {
             <div className="cyber-cut bg-destructive/10 border border-destructive/40 p-6 text-center space-y-4">
               <AlertTriangle className="size-10 text-destructive mx-auto" />
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Este link está incompleto ou expirou. Solicite um novo e-mail de
-                recuperação.
+                {t("auth.invalidLink")}
               </p>
               <Link
                 to="/esqueci-senha"
                 className="cyber-cut inline-block bg-blood text-white font-bold uppercase tracking-widest text-sm px-6 py-3 hover:bg-blood-bright transition-colors"
               >
-                Solicitar novo link
+                {t("auth.requestNewLink")}
               </Link>
             </div>
           ) : (
@@ -120,7 +127,7 @@ function ResetPasswordPage() {
               className="flex flex-col gap-5"
             >
               <CyberInput
-                label="Nova senha"
+                label={t("auth.newPassword")}
                 type="password"
                 autoComplete="new-password"
                 placeholder="••••••••"
@@ -128,7 +135,7 @@ function ResetPasswordPage() {
                 {...register("newPassword")}
               />
               <CyberInput
-                label="Confirmar nova senha"
+                label={t("auth.confirmNewPassword")}
                 type="password"
                 autoComplete="new-password"
                 placeholder="••••••••"
@@ -141,7 +148,7 @@ function ResetPasswordPage() {
                 loading={isPending}
                 className="mt-2"
               >
-                Redefinir senha
+                {t("auth.resetPassword")}
               </CyberButton>
             </form>
           )}
@@ -151,7 +158,7 @@ function ResetPasswordPage() {
               to="/login"
               className="text-blood-bright font-bold hover:underline"
             >
-              Voltar ao login
+              {t("auth.backToLogin")}
             </Link>
           </p>
         </div>

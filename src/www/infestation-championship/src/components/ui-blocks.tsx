@@ -1,17 +1,21 @@
 import { Loader2, AlertTriangle, Inbox } from "lucide-react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
-export function PageLoader({ label = "Carregando…" }: { label?: string }) {
+export function PageLoader({ label }: { label?: string }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
       <Loader2 className="size-8 animate-spin text-blood-bright" />
-      <p className="text-xs uppercase tracking-widest">{label}</p>
+      <p className="text-xs uppercase tracking-widest">
+        {label ?? t("common.loading")}
+      </p>
     </div>
   );
 }
 
 export function ErrorBox({
-  title = "Erro ao carregar",
+  title,
   message,
   action,
 }: {
@@ -19,11 +23,14 @@ export function ErrorBox({
   message: string;
   action?: ReactNode;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="cyber-cut bg-obsidian-light border border-destructive p-6 flex flex-col items-start gap-3">
       <div className="flex items-center gap-2 text-destructive">
         <AlertTriangle className="size-5" />
-        <h3 className="font-display text-2xl uppercase">{title}</h3>
+        <h3 className="font-display text-2xl uppercase">
+          {title ?? t("common.errorLoading")}
+        </h3>
       </div>
       <p className="text-sm text-muted-foreground">{message}</p>
       {action}

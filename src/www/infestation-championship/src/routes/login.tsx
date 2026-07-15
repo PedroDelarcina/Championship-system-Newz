@@ -3,12 +3,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useLogin } from "@/hooks/api";
 import { CyberInput } from "@/components/cyber-input";
 import { CyberButton } from "@/components/cyber-button";
 import { getApiErrorMessage } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
-import { useEffect } from "react";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -20,16 +21,29 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
-const schema = z.object({
-  email: z.string().trim().email("E-mail inválido").max(255),
-  password: z.string().min(1, "Informe a senha").max(100),
-});
-type FormData = z.infer<typeof schema>;
+type FormData = {
+  email: string;
+  password: string;
+};
 
 function LoginPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const token = useAuthStore((s) => s.token);
   const { mutateAsync, isPending } = useLogin();
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        email: z.string().trim().email(t("validation.emailInvalid")).max(255),
+        password: z
+          .string()
+          .min(1, t("validation.passwordRequired"))
+          .max(100),
+      }),
+    [t],
+  );
+
   const {
     register,
     handleSubmit,
@@ -43,7 +57,7 @@ function LoginPage() {
   const onSubmit = async (data: FormData) => {
     try {
       await mutateAsync(data);
-      toast.success("Acesso concedido");
+      toast.success(t("auth.accessGranted"));
       navigate({ to: "/" });
     } catch (e) {
       toast.error(getApiErrorMessage(e));
@@ -55,23 +69,23 @@ function LoginPage() {
       <div className="w-full max-w-md">
         <div className="cyber-cut-br bg-obsidian-light border border-obsidian-border border-l-4 border-l-blood-bright p-8 md:p-10">
           <p className="text-blood-bright font-bold tracking-[0.25em] uppercase text-xs mb-2">
-            Auth Protocol
+            {t("auth.authProtocol")}
           </p>
           <h1 className="font-display text-4xl md:text-5xl uppercase font-bold leading-none mb-8">
-            Acessar Sistema
+            {t("auth.loginTitle")}
           </h1>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
             <CyberInput
-              label="E-mail"
+              label={t("common.email")}
               type="email"
               autoComplete="email"
-              placeholder="seu@email.com"
+              placeholder={t("auth.emailPlaceholder")}
               error={errors.email?.message}
               {...register("email")}
             />
             <CyberInput
-              label="Senha"
+              label={t("common.password")}
               type="password"
               autoComplete="current-password"
               placeholder="••••••••"
@@ -83,7 +97,7 @@ function LoginPage() {
                 to="/esqueci-senha"
                 className="text-xs uppercase tracking-widest text-blood-bright font-bold hover:underline"
               >
-                Esqueci minha senha
+                {t("auth.forgotPassword")}
               </Link>
             </div>
             <CyberButton
@@ -92,17 +106,17 @@ function LoginPage() {
               loading={isPending}
               className="mt-2"
             >
-              Entrar
+              {t("auth.enter")}
             </CyberButton>
           </form>
 
           <p className="text-sm text-muted-foreground mt-6 text-center uppercase tracking-wider">
-            Ainda não tem conta?{" "}
+            {t("auth.noAccount")}{" "}
             <Link
               to="/register"
               className="text-blood-bright font-bold hover:underline"
             >
-              Registre-se
+              {t("auth.signUp")}
             </Link>
           </p>
         </div>

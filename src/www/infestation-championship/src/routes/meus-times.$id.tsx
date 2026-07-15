@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Crown, Plus, Trash2, UserPlus } from "lucide-react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   useAddJogador,
   useDeleteTime,
@@ -24,12 +26,12 @@ export const Route = createFileRoute("/meus-times/$id")({
   component: TimeDetalhePage,
 });
 
-const jogadorSchema = z.object({
-  usuarioId: z.string().trim().min(1, "Informe o ID do jogador"),
-});
-type JogadorForm = z.infer<typeof jogadorSchema>;
+type JogadorForm = {
+  usuarioId: string;
+};
 
 function TimeDetalhePage() {
+  const { t } = useTranslation();
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -37,6 +39,14 @@ function TimeDetalhePage() {
   const addJogador = useAddJogador();
   const removeJogador = useRemoveJogador();
   const deleteTime = useDeleteTime();
+
+  const jogadorSchema = useMemo(
+    () =>
+      z.object({
+        usuarioId: z.string().trim().min(1, t("validation.playerIdRequired")),
+      }),
+    [t],
+  );
 
   const {
     register,
@@ -50,7 +60,7 @@ function TimeDetalhePage() {
     return (
       <div className="max-w-3xl mx-auto px-6 pt-32">
         <ErrorBox
-          message={error ? getApiErrorMessage(error) : "Time não encontrado"}
+          message={error ? getApiErrorMessage(error) : t("teams.teamNotFound")}
         />
       </div>
     );
@@ -65,7 +75,7 @@ function TimeDetalhePage() {
         timeId: time.id,
         usuarioId: data.usuarioId,
       });
-      toast.success("Jogador adicionado");
+      toast.success(t("teams.playerAdded"));
       reset();
     } catch (e) {
       toast.error(getApiErrorMessage(e));
@@ -73,20 +83,20 @@ function TimeDetalhePage() {
   };
 
   const onRemove = async (jogadorId: string | number) => {
-    if (!confirm("Remover este jogador do time?")) return;
+    if (!confirm(t("teams.confirmRemovePlayer"))) return;
     try {
       await removeJogador.mutateAsync({ timeId: time.id, jogadorId });
-      toast.success("Jogador removido");
+      toast.success(t("teams.playerRemoved"));
     } catch (e) {
       toast.error(getApiErrorMessage(e));
     }
   };
 
   const onDelete = async () => {
-    if (!confirm(`Deletar o time "${time.nome}"? Esta ação é permanente.`)) return;
+    if (!confirm(t("teams.confirmDeleteTeam", { name: time.nome }))) return;
     try {
       await deleteTime.mutateAsync(time.id);
-      toast.success("Time deletado");
+      toast.success(t("teams.teamDeleted"));
       navigate({ to: "/meus-times" });
     } catch (e) {
       toast.error(getApiErrorMessage(e));
@@ -98,9 +108,9 @@ function TimeDetalhePage() {
       <div className="flex items-start gap-6 mb-8">
         <TeamLogo url={time.logoUrl} name={time.nome} size={80} className="rounded-md" />
         <PageHeader
-          eyebrow={time.clanTag ? `[${time.clanTag}]` : "Squad"}
+          eyebrow={time.clanTag ? `[${time.clanTag}]` : t("teams.squad")}
           title={time.nome}
-          description={souLider ? "Você é o líder deste time." : undefined}
+          description={souLider ? t("teams.youAreLeader") : undefined}
           actions={
             podeAdmin ? (
               <CyberButton
@@ -109,7 +119,7 @@ function TimeDetalhePage() {
                 onClick={onDelete}
                 loading={deleteTime.isPending}
               >
-                <Trash2 className="size-4" /> Deletar Time
+                <Trash2 className="size-4" /> {t("teams.deleteTeam")}
               </CyberButton>
             ) : undefined
           }
@@ -120,12 +130,12 @@ function TimeDetalhePage() {
         {/* Jogadores */}
         <div className="lg:col-span-2">
           <h2 className="font-display text-2xl uppercase mb-4 text-blood-bright">
-            Jogadores ({time.jogadores?.length ?? 0})
+            {t("teams.playersTitle", { count: time.jogadores?.length ?? 0 })}
           </h2>
           <div className="space-y-3">
             {(!time.jogadores || time.jogadores.length === 0) && (
               <p className="text-muted-foreground text-sm uppercase tracking-wider">
-                Nenhum jogador no time ainda.
+                {t("teams.noPlayersYet")}
               </p>
             )}
             {time.jogadores?.map((j) => {
@@ -152,7 +162,7 @@ function TimeDetalhePage() {
                     <button
                       onClick={() => onRemove(j.id)}
                       className="text-destructive hover:text-white transition-colors p-2"
-                      aria-label="Remover jogador"
+                      aria-label={t("teams.removePlayer")}
                     >
                       <Trash2 className="size-4" />
                     </button>
@@ -169,19 +179,19 @@ function TimeDetalhePage() {
             >
               <h3 className="font-display text-xl uppercase flex items-center gap-2">
                 <UserPlus className="size-5 text-blood-bright" />
-                Adicionar Jogador
+                {t("teams.addPlayer")}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <CyberInput
-                  label="ID do jogador"
-                  placeholder="Cole o ID do usuário"
-                  hint="Use o ID do usuário cadastrado no sistema."
+                  label={t("teams.playerId")}
+                  placeholder={t("teams.playerIdPlaceholder")}
+                  hint={t("teams.playerIdHint")}
                   error={errors.usuarioId?.message}
                   {...register("usuarioId")}
                 />
               </div>
               <CyberButton type="submit" loading={addJogador.isPending}>
-                <Plus className="size-4" /> Adicionar
+                <Plus className="size-4" /> {t("teams.add")}
               </CyberButton>
             </form>
           )}
@@ -193,7 +203,7 @@ function TimeDetalhePage() {
             to="/meus-times"
             className="text-xs uppercase tracking-widest text-muted-foreground hover:text-white inline-block"
           >
-            ← Voltar para meus times
+            {t("teams.backToTeams")}
           </Link>
         </aside>
       </div>

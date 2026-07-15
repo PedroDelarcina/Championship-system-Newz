@@ -1,14 +1,28 @@
+import type { TFunction } from "i18next";
 import type { StatusCampeonato, StatusInscricao } from "@/types/api";
 
-export function statusCampeonatoLabel(s: StatusCampeonato | undefined): string {
-  const map: Record<string, string> = {
-    NaoIniciado: "Inscrições Abertas",
-    EmAndamento: "Em Andamento",
-    Finalizado: "Finalizado",
-    Desativado: "Desativado",
-  };
+const STATUS_CAMPEONATO_KEYS: Record<string, string> = {
+  NaoIniciado: "status.tournament.open",
+  EmAndamento: "status.tournament.running",
+  Finalizado: "status.tournament.finished",
+  Desativado: "status.tournament.disabled",
+};
+
+const STATUS_INSCRICAO_KEYS: Record<string, string> = {
+  Pendente: "status.registration.pending",
+  Confirmado: "status.registration.confirmed",
+  Cancelado: "status.registration.canceled",
+  Eliminado: "status.registration.eliminated",
+  Campeao: "status.registration.champion",
+};
+
+export function statusCampeonatoLabel(
+  s: StatusCampeonato | undefined,
+  t: TFunction,
+): string {
   const key = s == null ? "" : String(s);
-  return map[key] ?? (s == null ? "—" : String(s));
+  const i18nKey = STATUS_CAMPEONATO_KEYS[key];
+  return i18nKey ? t(i18nKey) : s == null ? "—" : String(s);
 }
 
 export type StatusKind = "open" | "running" | "finished" | "disabled" | "other";
@@ -22,15 +36,9 @@ export function statusCampeonatoKind(s: StatusCampeonato | undefined): StatusKin
   return "other";
 }
 
-export function statusInscricaoLabel(s: StatusInscricao): string {
-  const map: Record<string, string> = {
-    Pendente: "Pendente",
-    Confirmado: "Confirmada",
-    Cancelado: "Cancelada",
-    Eliminado: "Eliminado",
-    Campeao: "Campeão",
-  };
-  return map[String(s)] ?? String(s);
+export function statusInscricaoLabel(s: StatusInscricao, t: TFunction): string {
+  const i18nKey = STATUS_INSCRICAO_KEYS[String(s)];
+  return i18nKey ? t(i18nKey) : String(s);
 }
 
 export type InscricaoStatusKind =

@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Pencil, Plus, Trash2, X, Power } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   useCampeonatos,
   useCreateCampeonato,
@@ -40,6 +41,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 function AdminCampeonatosPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { data, isLoading, error } = useCampeonatos();
@@ -66,10 +68,10 @@ function AdminCampeonatosPage() {
     setOpen(true);
   };
   const handleDelete = async (c: Campeonato) => {
-    if (!confirm(`Deletar campeonato "${c.nome}"?`)) return;
+    if (!confirm(t("admin.confirmDeleteTournament", { name: c.nome }))) return;
     try {
       await deleteMut.mutateAsync(c.id);
-      toast.success("Campeonato deletado");
+      toast.success(t("admin.tournamentDeleted"));
     } catch (e) {
       toast.error(getApiErrorMessage(e));
     }
@@ -78,19 +80,19 @@ function AdminCampeonatosPage() {
   return (
     <section className="max-w-[1440px] mx-auto px-6 pb-20">
       <PageHeader
-        eyebrow="Admin Console"
-        title="Campeonatos"
-        description="Informações completas dos campeonatos."
+        eyebrow={t("admin.console")}
+        title={t("admin.tournamentsTitle")}
+        description={t("admin.tournamentsDescription")}
         actions={
           <>
             <Link
               to="/admin/inscricoes"
               className="cyber-cut bg-obsidian-light border border-obsidian-border text-white font-bold uppercase tracking-widest text-xs px-5 py-2.5 hover:bg-obsidian-border transition-colors"
             >
-              Inscrições
+              {t("nav.registrations")}
             </Link>
             <CyberButton onClick={handleNew}>
-              <Plus className="size-4" /> Novo
+              <Plus className="size-4" /> {t("common.new")}
             </CyberButton>
           </>
         }
@@ -106,22 +108,22 @@ function AdminCampeonatosPage() {
               <thead className="bg-obsidian border-b border-obsidian-border">
                 <tr>
                   <th className="text-left p-4 uppercase tracking-widest text-xs text-muted-foreground font-bold">
-                    Nome
+                    {t("common.name")}
                   </th>
                   <th className="text-left p-4 uppercase tracking-widest text-xs text-muted-foreground font-bold">
-                    Tipo
+                    {t("common.type")}
                   </th>
                   <th className="text-left p-4 uppercase tracking-widest text-xs text-muted-foreground font-bold">
-                    Ativo (admin)
+                    {t("admin.activeAdmin")}
                   </th>
                   <th className="text-left p-4 uppercase tracking-widest text-xs text-muted-foreground font-bold">
-                    Status
+                    {t("common.status")}
                   </th>
                   <th className="text-left p-4 uppercase tracking-widest text-xs text-muted-foreground font-bold">
-                    Inscrições
+                    {t("admin.registrationsCount")}
                   </th>
                   <th className="text-right p-4 uppercase tracking-widest text-xs text-muted-foreground font-bold">
-                    Ações
+                    {t("common.actions")}
                   </th>
                 </tr>
               </thead>
@@ -132,7 +134,7 @@ function AdminCampeonatosPage() {
                       colSpan={6}
                       className="p-8 text-center text-muted-foreground uppercase tracking-wider text-xs"
                     >
-                      Nenhum campeonato cadastrado.
+                      {t("admin.noTournaments")}
                     </td>
                   </tr>
                 )}
@@ -146,7 +148,7 @@ function AdminCampeonatosPage() {
                       {c.tipo}
                     </td>
                     <td className="p-4 text-muted-foreground tabular-nums">
-                      {c.isAtivo ? "Sim" : "Não"}
+                      {c.isAtivo ? t("common.yes") : t("common.no")}
                     </td>
                     <td className="p-4">
                       <StatusBadge status={c.status} />
@@ -160,28 +162,28 @@ function AdminCampeonatosPage() {
                           onClick={async () => {
                             try {
                               await toggleStatusMut.mutateAsync(c.id);
-                              toast.success("Status alternado");
+                              toast.success(t("admin.statusToggled"));
                             } catch (e) {
                               toast.error(getApiErrorMessage(e));
                             }
                           }}
                           className="p-2 hover:bg-obsidian-border transition-colors"
-                          aria-label="Alternar status"
-                          title="Alternar status"
+                          aria-label={t("admin.toggleStatus")}
+                          title={t("admin.toggleStatus")}
                         >
                           <Power className="size-4" />
                         </button>
                         <button
                           onClick={() => handleEdit(c)}
                           className="p-2 hover:bg-obsidian-border transition-colors"
-                          aria-label="Editar"
+                          aria-label={t("common.edit")}
                         >
                           <Pencil className="size-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(c)}
                           className="p-2 hover:bg-destructive transition-colors text-destructive hover:text-white"
-                          aria-label="Deletar"
+                          aria-label={t("admin.delete")}
                         >
                           <Trash2 className="size-4" />
                         </button>
@@ -218,6 +220,7 @@ function CampeonatoFormModal({
   createMut: ReturnType<typeof useCreateCampeonato>;
   updateMut: ReturnType<typeof useUpdateCampeonato>;
 }) {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -250,10 +253,10 @@ function CampeonatoFormModal({
     try {
       if (campeonato) {
         await updateMut.mutateAsync({ id: campeonato.id, data: payload });
-        toast.success("Campeonato atualizado");
+        toast.success(t("admin.tournamentUpdated"));
       } else {
         await createMut.mutateAsync(payload);
-        toast.success("Campeonato criado");
+        toast.success(t("admin.tournamentCreated"));
       }
       onClose();
     } catch (e) {
@@ -269,29 +272,29 @@ function CampeonatoFormModal({
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 hover:bg-obsidian-border transition-colors z-10"
-          aria-label="Fechar"
+          aria-label={t("common.close")}
         >
           <X className="size-5" />
         </button>
         <form onSubmit={handleSubmit(onSubmit)} className="p-8 flex flex-col gap-4">
           <h2 className="font-display text-3xl uppercase mb-2">
-            {campeonato ? "Editar" : "Novo"} Campeonato
+            {campeonato ? t("admin.editTournament") : t("admin.newTournament")}
           </h2>
 
           <CyberInput
-            label="Nome"
+            label={t("common.name")}
             error={errors.nome?.message}
             {...register("nome")}
           />
           <div className="grid grid-cols-2 gap-4">
             <CyberInput
-              label="Tipo"
-              placeholder="Ex: ClanxClan"
+              label={t("common.type")}
+              placeholder={t("admin.typePlaceholder")}
               error={errors.tipoCampeonato?.message}
               {...register("tipoCampeonato")}
             />
             <CyberInput
-              label="Máximo de participantes"
+              label={t("admin.maxParticipants")}
               type="number"
               min={2}
               error={errors.maxParticipantes?.message}
@@ -300,39 +303,39 @@ function CampeonatoFormModal({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <CyberInput
-              label="Data Início"
+              label={t("admin.startDate")}
               type="date"
               error={errors.dataInicio?.message}
               {...register("dataInicio")}
             />
             <CyberInput
-              label="Data Fim"
+              label={t("admin.endDate")}
               type="date"
               error={errors.dataFim?.message}
               {...register("dataFim")}
             />
           </div>
           <CyberTextarea
-            label="Descrição das regras"
+            label={t("admin.rulesDescription")}
             error={errors.descricaoRegras?.message}
             {...register("descricaoRegras")}
           />
           <CyberTextarea
-            label="Regras extras"
+            label={t("admin.extraRules")}
             error={errors.regrasExtras?.message}
             {...register("regrasExtras")}
           />
 
           <div className="flex gap-3 pt-2">
             <CyberButton type="submit" loading={isPending}>
-              {campeonato ? "Salvar" : "Criar"}
+              {campeonato ? t("common.save") : t("common.create")}
             </CyberButton>
             <button
               type="button"
               onClick={onClose}
               className="cyber-cut bg-obsidian-light border border-obsidian-border text-white font-bold uppercase tracking-widest text-sm px-6 py-2.5 hover:bg-obsidian-border transition-colors"
             >
-              Cancelar
+              {t("common.cancel")}
             </button>
           </div>
         </form>

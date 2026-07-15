@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useCampeonatos } from "@/hooks/api";
 import { CampeonatoCard } from "@/components/campeonato-card";
 import { CyberButton } from "@/components/cyber-button";
@@ -29,13 +30,6 @@ export const Route = createFileRoute("/campeonatos")({
 
 type Filtro = "todos" | "open" | "running" | "finished";
 
-const FILTROS: { value: Filtro; label: string }[] = [
-  { value: "todos", label: "Todos" },
-  { value: "open", label: "Inscrições Abertas" },
-  { value: "running", label: "Em Andamento" },
-  { value: "finished", label: "Finalizados" },
-];
-
 function CampeonatosLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isLista =
@@ -49,8 +43,20 @@ function CampeonatosLayout() {
 }
 
 function CampeonatosLista() {
+  const { t } = useTranslation();
   const [filtro, setFiltro] = useState<Filtro>("todos");
   const { data, isLoading, error } = useCampeonatos();
+
+  const filtros = useMemo(
+    () =>
+      [
+        { value: "todos" as const, label: t("status.filter.all") },
+        { value: "open" as const, label: t("status.filter.open") },
+        { value: "running" as const, label: t("status.filter.running") },
+        { value: "finished" as const, label: t("status.filter.finished") },
+      ] satisfies { value: Filtro; label: string }[],
+    [t],
+  );
 
   const filtrados = (data ?? []).filter((c) =>
     filtro === "todos" ? true : statusCampeonatoKind(c.status) === filtro,
@@ -59,13 +65,13 @@ function CampeonatosLista() {
   return (
     <section className="max-w-[1440px] mx-auto px-6 pb-20">
       <PageHeader
-        eyebrow="Data Grid"
-        title="Campeonatos"
-        description="Todos os campeonatos disponíveis. Filtre por status para encontrar o seu próximo desafio."
+        eyebrow={t("tournaments.dataGrid")}
+        title={t("tournaments.title")}
+        description={t("tournaments.description")}
       />
 
       <div className="flex flex-wrap gap-2 mb-8 border-b border-obsidian-border pb-4">
-        {FILTROS.map((f) => (
+        {filtros.map((f) => (
           <button
             key={f.value}
             onClick={() => setFiltro(f.value)}
@@ -91,15 +97,15 @@ function CampeonatosLista() {
               size="sm"
               onClick={() => window.location.reload()}
             >
-              Tentar novamente
+              {t("common.tryAgain")}
             </CyberButton>
           }
         />
       )}
       {!isLoading && !error && filtrados.length === 0 && (
         <EmptyState
-          title="Nenhum campeonato encontrado"
-          description="Ajuste o filtro ou aguarde novos torneios."
+          title={t("tournaments.noneFound")}
+          description={t("tournaments.noneFoundDesc")}
         />
       )}
       {filtrados.length > 0 && (
