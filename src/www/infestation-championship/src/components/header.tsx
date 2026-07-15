@@ -1,29 +1,32 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { LogOut, Trophy, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/stores/auth-store";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { cn } from "@/lib/utils";
 
 interface NavLink {
   to: string;
-  label: string;
+  labelKey: string;
   exact?: boolean;
 }
 
 export function Header() {
+  const { t } = useTranslation();
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const links: NavLink[] = [
-    { to: "/", label: "Home", exact: true },
-    { to: "/campeonatos", label: "Campeonatos" },
+    { to: "/", labelKey: "nav.home", exact: true },
+    { to: "/campeonatos", labelKey: "nav.tournaments" },
   ];
   if (user) {
-    links.push({ to: "/meus-times", label: "Meus Times" });
-    if (user.isAdmin) links.push({ to: "/admin/campeonatos", label: "Admin" });
-    links.push({ to: "/perfil", label: "Perfil" });
+    links.push({ to: "/meus-times", labelKey: "nav.myTeams" });
+    if (user.isAdmin) links.push({ to: "/admin/campeonatos", labelKey: "nav.admin" });
+    links.push({ to: "/perfil", labelKey: "nav.profile" });
   }
 
   const handleLogout = () => {
@@ -56,12 +59,13 @@ export function Header() {
                   : "text-muted-foreground border-transparent hover:text-white",
               )}
             >
-              {l.label}
+              {t(l.labelKey)}
             </Link>
           ))}
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
+          <LanguageSwitcher />
           {user ? (
             <>
               <span className="text-xs uppercase tracking-widest text-muted-foreground">
@@ -72,7 +76,7 @@ export function Header() {
                 className="cyber-cut bg-obsidian-light border border-obsidian-border text-white font-bold uppercase tracking-widest text-xs px-5 py-2.5 hover:bg-blood hover:border-blood transition-colors flex items-center gap-2 cursor-pointer"
               >
                 <LogOut className="size-3.5" />
-                Sair
+                {t("nav.logout")}
               </button>
             </>
           ) : (
@@ -81,13 +85,13 @@ export function Header() {
                 to="/login"
                 className="cyber-cut bg-obsidian-light border border-obsidian-border text-white font-bold uppercase tracking-widest text-xs px-5 py-2.5 hover:bg-obsidian-border transition-colors"
               >
-                Login
+                {t("nav.login")}
               </Link>
               <Link
                 to="/register"
                 className="cyber-cut bg-blood text-white font-bold uppercase tracking-widest text-xs px-5 py-2.5 hover:bg-blood-bright transition-colors glow-blood"
               >
-                Registrar
+                {t("nav.register")}
               </Link>
             </>
           )}
@@ -96,7 +100,7 @@ export function Header() {
         <button
           onClick={() => setMobileOpen((v) => !v)}
           className="lg:hidden text-white p-2"
-          aria-label="Menu"
+          aria-label={t("common.menu")}
         >
           {mobileOpen ? <X className="size-6" /> : <Menu className="size-6" />}
         </button>
@@ -105,6 +109,9 @@ export function Header() {
       {mobileOpen && (
         <div className="lg:hidden border-t border-obsidian-border bg-obsidian">
           <nav className="flex flex-col px-4 py-4 gap-1">
+            <div className="pb-3 mb-2 border-b border-obsidian-border">
+              <LanguageSwitcher className="w-full justify-center" />
+            </div>
             {links.map((l) => (
               <Link
                 key={l.to}
@@ -117,7 +124,7 @@ export function Header() {
                     : "text-muted-foreground border-transparent",
                 )}
               >
-                {l.label}
+                {t(l.labelKey)}
               </Link>
             ))}
             <div className="pt-3 mt-2 border-t border-obsidian-border flex flex-col gap-2">
@@ -129,7 +136,7 @@ export function Header() {
                   }}
                   className="cyber-cut bg-blood text-white font-bold uppercase tracking-widest text-xs px-5 py-3 flex items-center justify-center gap-2"
                 >
-                  <LogOut className="size-3.5" /> Sair ({user.nickName})
+                  <LogOut className="size-3.5" /> {t("nav.logout")} ({user.nickName})
                 </button>
               ) : (
                 <>
@@ -138,14 +145,14 @@ export function Header() {
                     onClick={() => setMobileOpen(false)}
                     className="cyber-cut bg-obsidian-light border border-obsidian-border text-white font-bold uppercase tracking-widest text-xs px-5 py-3 text-center"
                   >
-                    Login
+                    {t("nav.login")}
                   </Link>
                   <Link
                     to="/register"
                     onClick={() => setMobileOpen(false)}
                     className="cyber-cut bg-blood text-white font-bold uppercase tracking-widest text-xs px-5 py-3 text-center"
                   >
-                    Registrar
+                    {t("nav.register")}
                   </Link>
                 </>
               )}

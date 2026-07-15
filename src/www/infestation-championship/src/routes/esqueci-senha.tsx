@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { MailCheck } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useForgotPassword } from "@/hooks/api";
 import { CyberInput } from "@/components/cyber-input";
 import { CyberButton } from "@/components/cyber-button";
@@ -23,15 +24,24 @@ export const Route = createFileRoute("/esqueci-senha")({
   component: EsqueciSenhaPage,
 });
 
-const schema = z.object({
-  email: z.string().trim().email("E-mail inválido").max(255),
-});
-type FormData = z.infer<typeof schema>;
+type FormData = {
+  email: string;
+};
 
 function EsqueciSenhaPage() {
+  const { t } = useTranslation();
   const { mutateAsync, isPending } = useForgotPassword();
   const [enviado, setEnviado] = useState(false);
   const [mensagemSucesso, setMensagemSucesso] = useState("");
+
+  const schema = useMemo(
+    () =>
+      z.object({
+        email: z.string().trim().email(t("validation.emailInvalid")).max(255),
+      }),
+    [t],
+  );
+
   const {
     register,
     handleSubmit,
@@ -42,11 +52,10 @@ function EsqueciSenhaPage() {
     try {
       const res = await mutateAsync({ email: data.email });
       setMensagemSucesso(
-        res.message ||
-          "Se o e-mail existir em nossa base, você receberá instruções em breve.",
+        res.message || t("auth.forgotSuccessFallback"),
       );
       setEnviado(true);
-      toast.success("Solicitação enviada");
+      toast.success(t("auth.requestSent"));
     } catch (e) {
       toast.error(getApiErrorMessage(e));
     }
@@ -57,14 +66,13 @@ function EsqueciSenhaPage() {
       <div className="w-full max-w-md">
         <div className="cyber-cut-br bg-obsidian-light border border-obsidian-border border-l-4 border-l-blood-bright p-8 md:p-10">
           <p className="text-blood-bright font-bold tracking-[0.25em] uppercase text-xs mb-2">
-            Recovery Protocol
+            {t("auth.recoveryProtocol")}
           </p>
           <h1 className="font-display text-4xl md:text-5xl uppercase font-bold leading-none mb-3">
-            Esqueci minha senha
+            {t("auth.forgotTitle")}
           </h1>
           <p className="text-sm text-muted-foreground uppercase tracking-wider mb-8">
-            Informe o e-mail da sua conta. Enviaremos um link para redefinir a
-            senha.
+            {t("auth.forgotDescription")}
           </p>
 
           {enviado ? (
@@ -74,13 +82,13 @@ function EsqueciSenhaPage() {
                 {mensagemSucesso}
               </p>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                Verifique também a pasta de spam.
+                {t("auth.checkSpam")}
               </p>
               <Link
                 to="/login"
                 className="cyber-cut inline-block bg-blood text-white font-bold uppercase tracking-widest text-sm px-6 py-3 hover:bg-blood-bright transition-colors"
               >
-                Voltar ao login
+                {t("auth.backToLogin")}
               </Link>
             </div>
           ) : (
@@ -89,10 +97,10 @@ function EsqueciSenhaPage() {
               className="flex flex-col gap-5"
             >
               <CyberInput
-                label="E-mail"
+                label={t("common.email")}
                 type="email"
                 autoComplete="email"
-                placeholder="seu@email.com"
+                placeholder={t("auth.emailPlaceholder")}
                 error={errors.email?.message}
                 {...register("email")}
               />
@@ -102,19 +110,19 @@ function EsqueciSenhaPage() {
                 loading={isPending}
                 className="mt-2"
               >
-                Enviar link de recuperação
+                {t("auth.sendRecoveryLink")}
               </CyberButton>
             </form>
           )}
 
           {!enviado && (
             <p className="text-sm text-muted-foreground mt-6 text-center uppercase tracking-wider">
-              Lembrou a senha?{" "}
+              {t("auth.rememberPassword")}{" "}
               <Link
                 to="/login"
                 className="text-blood-bright font-bold hover:underline"
               >
-                Entrar
+                {t("auth.enter")}
               </Link>
             </p>
           )}

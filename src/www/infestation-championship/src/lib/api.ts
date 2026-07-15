@@ -1,4 +1,5 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
+import i18n from "@/i18n";
 import { useAuthStore } from "@/stores/auth-store";
 import type { ApiResponse, TokenResponseDto, User } from "@/types/api";
 
@@ -184,11 +185,12 @@ export function getApiErrorMessage(err: unknown): string {
       }
     }
     if (err.message === "Network Error") {
-      return "Não foi possível conectar à API. Verifique se o backend C# está rodando em " +
-        (import.meta.env.VITE_API_URL || defaultApiBase);
+      return i18n.t("common.networkError", {
+        url: import.meta.env.VITE_API_URL || defaultApiBase,
+      });
     }
     return err.message;
   }
   if (err instanceof Error) return err.message;
-  return "Erro desconhecido";
+  return i18n.t("common.unknownError");
 }

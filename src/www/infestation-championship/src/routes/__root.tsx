@@ -1,3 +1,4 @@
+import "@/i18n";
 import {
   Outlet,
   Link,
@@ -7,6 +8,7 @@ import {
 } from "@tanstack/react-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
+import { useTranslation } from "react-i18next";
 import { queryClient } from "@/lib/query-client";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -14,6 +16,8 @@ import { Footer } from "@/components/footer";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
+  const { t } = useTranslation();
+
   return (
     <div className="flex min-h-dvh items-center justify-center bg-obsidian px-4 pt-24">
       <div className="max-w-md text-center">
@@ -21,17 +25,17 @@ function NotFoundComponent() {
           404
         </h1>
         <h2 className="mt-4 font-display text-3xl uppercase tracking-wide">
-          Página não encontrada
+          {t("notFound.title")}
         </h2>
         <p className="mt-2 text-sm text-muted-foreground uppercase tracking-wider">
-          O recurso solicitado não existe ou foi movido.
+          {t("notFound.description")}
         </p>
         <div className="mt-6">
           <Link
             to="/"
             className="cyber-cut inline-flex items-center justify-center bg-blood text-white font-bold uppercase tracking-widest text-sm px-8 py-3 hover:bg-blood-bright transition-colors glow-blood"
           >
-            Voltar para Home
+            {t("common.backToHome")}
           </Link>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Trophy } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useCampeonatos } from "@/hooks/api";
 import { CampeonatoCard } from "@/components/campeonato-card";
 import { CyberButton } from "@/components/cyber-button";
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
+  const { t } = useTranslation();
   const { data, isLoading, error } = useCampeonatos();
   const ativos =
     data?.filter(
@@ -41,20 +43,20 @@ function HomePage() {
         <div className="max-w-[1440px] mx-auto px-6 w-full flex flex-col items-center text-center relative z-10">
           <div className="cyber-badge inline-block bg-obsidian-border border border-obsidian-border px-4 py-1.5 mb-8">
             <span className="text-blood-bright font-bold tracking-[0.2em] text-xs uppercase">
-              Inscrições Abertas
+              {t("home.badge")}
             </span>
           </div>
 
           <h1 className="font-display text-6xl md:text-8xl lg:text-[9rem] font-bold uppercase leading-[0.85] tracking-tight mb-6 drop-shadow-2xl">
-            Campeonatos e 
+            {t("home.heroTitle1")}{" "}
             <br />
             <span className="text-transparent bg-clip-text bg-linear-to-r from-blood-bright to-white">
-              Torneios
+              {t("home.heroTitle2")}
             </span>
           </h1>
 
           <p className="max-w-[65ch] text-muted-foreground text-base md:text-xl font-medium tracking-wide mb-12 uppercase text-balance">
-            A maior plataforma de gestão de campeonatos da comunidade Infestation: The New Z.
+            {t("home.heroDescription")}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -62,13 +64,13 @@ function HomePage() {
               to="/campeonatos"
               className="cyber-cut bg-blood text-white font-bold uppercase tracking-widest text-base md:text-lg px-10 md:px-12 py-4 hover:bg-blood-bright transition-colors glow-blood inline-flex items-center gap-3"
             >
-              Explorar Campeonatos <ArrowRight className="size-5" />
+              {t("home.exploreTournaments")} <ArrowRight className="size-5" />
             </Link>
             <Link
               to="/meus-times/novo"
               className="cyber-cut bg-obsidian-light border border-obsidian-border text-white font-bold uppercase tracking-widest text-base md:text-lg px-10 md:px-12 py-4 hover:bg-obsidian-border transition-colors"
             >
-              Criar Time
+              {t("home.createTeam")}
             </Link>
           </div>
         </div>
@@ -80,10 +82,10 @@ function HomePage() {
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
             <div>
               <p className="text-blood-bright font-bold tracking-[0.25em] uppercase text-xs mb-2">
-                Live Now
+                {t("home.liveNow")}
               </p>
               <h2 className="font-display text-4xl md:text-5xl font-bold uppercase tracking-wide leading-none">
-                Campeonatos Ativos
+                {t("home.activeTournaments")}
               </h2>
               <div className="h-1 w-24 bg-blood-bright mt-4" />
             </div>
@@ -91,11 +93,11 @@ function HomePage() {
               to="/campeonatos"
               className="text-white border-b-2 border-blood-bright pb-1 font-bold uppercase tracking-wider text-sm hover:text-blood-bright transition-colors inline-flex items-center gap-2 self-start"
             >
-              Ver todos <ArrowRight className="size-4" />
+              {t("common.seeAll")} <ArrowRight className="size-4" />
             </Link>
           </div>
 
-          {isLoading && <PageLoader label="Carregando campeonatos…" />}
+          {isLoading && <PageLoader label={t("common.loadingTournaments")} />}
           {error && (
             <ErrorBox
               message={getApiErrorMessage(error)}
@@ -105,15 +107,15 @@ function HomePage() {
                   size="sm"
                   onClick={() => window.location.reload()}
                 >
-                  Tentar novamente
+                  {t("common.tryAgain")}
                 </CyberButton>
               }
             />
           )}
           {!isLoading && !error && ativos.length === 0 && (
             <EmptyState
-              title="Nenhum campeonato ativo"
-              description="Aguarde — novos campeonatos serão anunciados em breve."
+              title={t("home.noActiveTournaments")}
+              description={t("home.noActiveTournamentsDesc")}
             />
           )}
           {ativos.length > 0 && (
@@ -133,23 +135,23 @@ function HomePage() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-blood/20 blur-[120px] rounded-full pointer-events-none" />
             <Trophy className="size-12 text-blood-bright mx-auto mb-6 relative z-10" />
             <h2 className="font-display text-4xl md:text-6xl uppercase font-bold tracking-wide relative z-10">
-              Pronto para a guerra?
+              {t("home.ctaTitle")}
             </h2>
             <p className="text-muted-foreground uppercase tracking-widest text-sm md:text-base mt-4 max-w-xl mx-auto relative z-10">
-              Crie sua conta, monte seu squad e inscreva-se nos próximos circuitos.
+              {t("home.ctaDescription")}
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center relative z-10">
               <Link
                 to="/register"
                 className="cyber-cut bg-blood text-white font-bold uppercase tracking-widest px-10 py-4 hover:bg-blood-bright transition-colors glow-blood"
               >
-                Criar Conta
+                {t("home.createAccount")}
               </Link>
               <Link
                 to="/campeonatos"
                 className="cyber-cut bg-transparent border border-obsidian-border text-white font-bold uppercase tracking-widest px-10 py-4 hover:bg-obsidian-border transition-colors"
               >
-                Ver Campeonatos
+                {t("home.viewTournaments")}
               </Link>
             </div>
           </div>

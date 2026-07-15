@@ -1,6 +1,9 @@
 import { Trophy } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="border-t border-obsidian-border bg-obsidian mt-24">
       <div className="max-w-[1440px] mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -11,7 +14,7 @@ export function Footer() {
           </span>
         </div>
         <p className="text-xs uppercase tracking-widest text-muted-foreground">
-          © {new Date().getFullYear()} Community Tournaments • All Rights Reserved @PedroDelarcina
+          {t("footer.copyright", { year: new Date().getFullYear() })}
         </p>
       </div>
     </footer>

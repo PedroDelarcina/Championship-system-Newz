@@ -2,8 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import type { Locale } from "date-fns";
 import { Award, Check, Skull, Trash2, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   useAprovarInscricao,
   useCampeonatos,
@@ -22,6 +23,7 @@ import {
   PageLoader,
 } from "@/components/ui-blocks";
 import { getApiErrorMessage } from "@/lib/api";
+import { getDateLocale } from "@/lib/date-locale";
 import { inscricaoStatusAtiva, statusInscricaoKind } from "@/lib/status";
 import { useAuthStore } from "@/stores/auth-store";
 import type { Inscricao, StatusInscricao } from "@/types/api";
@@ -42,19 +44,10 @@ type FiltroStatus =
   | "Eliminado"
   | "Campeao";
 
-const FILTROS_STATUS: { value: FiltroStatus; label: string }[] = [
-  { value: "todas", label: "Todas" },
-  { value: "Pendente", label: "Pendentes" },
-  { value: "Confirmado", label: "Confirmadas" },
-  { value: "Cancelado", label: "Canceladas" },
-  { value: "Eliminado", label: "Eliminadas" },
-  { value: "Campeao", label: "Campeões" },
-];
-
-function safeFormat(d?: string) {
+function safeFormat(d: string | undefined, locale: Locale) {
   if (!d) return "—";
   try {
-    return format(parseISO(d), "dd/MM/yyyy HH:mm", { locale: ptBR });
+    return format(parseISO(d), "dd/MM/yyyy HH:mm", { locale });
   } catch {
     return "—";
   }
@@ -66,6 +59,7 @@ function statusMatchesFiltro(status: StatusInscricao, filtro: FiltroStatus) {
 }
 
 function AdminInscricoesPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { data, isLoading, error } = useInscricoes();
@@ -78,6 +72,34 @@ function AdminInscricoesPage() {
 
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>("todas");
   const [filtroCampeonatoId, setFiltroCampeonatoId] = useState<string>("todos");
+
+  const filtrosStatus = useMemo(
+    () =>
+      [
+        { value: "todas" as const, label: t("status.registrationFilter.all") },
+        {
+          value: "Pendente" as const,
+          label: t("status.registrationFilter.pending"),
+        },
+        {
+          value: "Confirmado" as const,
+          label: t("status.registrationFilter.confirmed"),
+        },
+        {
+          value: "Cancelado" as const,
+          label: t("status.registrationFilter.canceled"),
+        },
+        {
+          value: "Eliminado" as const,
+          label: t("status.registrationFilter.eliminated"),
+        },
+        {
+          value: "Campeao" as const,
+          label: t("status.registrationFilter.champion"),
+        },
+      ] satisfies { value: FiltroStatus; label: string }[],
+    [t],
+  );
 
   useEffect(() => {
     if (!user) navigate({ to: "/login" });
@@ -114,14 +136,16 @@ function AdminInscricoesPage() {
   };
 
   const handleRemover = async (i: Inscricao) => {
-    const msg =
-      inscricaoStatusAtiva(i.status)
-        ? `Remover permanentemente a inscrição de "${i.timeNome}" em "${i.campeonatoNome}"? O time poderá ser excluído ou se inscrever novamente.`
-        : `Remover registro da inscrição de "${i.timeNome}"? Isso libera a exclusão do time.`;
+    const msg = inscricaoStatusAtiva(i.status)
+      ? t("admin.confirmRemoveActive", {
+          team: i.timeNome,
+          tournament: i.campeonatoNome,
+        })
+      : t("admin.confirmRemoveInactive", { team: i.timeNome });
     if (!confirm(msg)) return;
     try {
       await remover.mutateAsync(i.id);
-      toast.success("Inscrição removida permanentemente");
+      toast.success(t("admin.registrationRemoved"));
     } catch (e) {
       toast.error(getApiErrorMessage(e));
     }
@@ -137,15 +161,15 @@ function AdminInscricoesPage() {
   return (
     <section className="max-w-[1440px] mx-auto px-6 pb-20">
       <PageHeader
-        eyebrow="Admin Console"
-        title="Inscrições"
-        description="Gerencie todas as inscrições por campeonato. Use «Remover» para liberar exclusão de times ou permitir nova inscrição."
+        eyebrow={t("admin.console")}
+        title={t("admin.registrationsTitle")}
+        description={t("admin.registrationsDescription")}
         actions={
           <Link
             to="/admin/campeonatos"
             className="cyber-cut bg-obsidian-light border border-obsidian-border text-white font-bold uppercase tracking-widest text-xs px-5 py-2.5 hover:bg-obsidian-border transition-colors"
           >
-            Campeonatos
+            {t("nav.tournaments")}
           </Link>
         }
       />
@@ -154,16 +178,15 @@ function AdminInscricoesPage() {
       <div className="flex flex-col lg:flex-row lg:items-end gap-4 mb-8">
         <div className="flex-1">
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-2">
-            Status
+            {t("common.status")}
             {contagemPendentes > 0 && (
               <span className="ml-2 text-amber-400">
-                ({contagemPendentes} pendente
-                {contagemPendentes !== 1 ? "s" : ""})
+                {t("admin.pendingCount", { count: contagemPendentes })}
               </span>
             )}
           </p>
           <div className="flex flex-wrap gap-2">
-            {FILTROS_STATUS.map((f) => (
+            {filtrosStatus.map((f) => (
               <button
                 key={f.value}
                 type="button"
@@ -185,7 +208,7 @@ function AdminInscricoesPage() {
             htmlFor="filtro-campeonato"
             className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-2 block"
           >
-            Campeonato
+            {t("nav.tournaments")}
           </label>
           <select
             id="filtro-campeonato"
@@ -193,7 +216,7 @@ function AdminInscricoesPage() {
             onChange={(e) => setFiltroCampeonatoId(e.target.value)}
             className="w-full cyber-cut bg-obsidian border border-obsidian-border px-4 py-2.5 text-sm uppercase tracking-wider"
           >
-            <option value="todos">Todos os campeonatos</option>
+            <option value="todos">{t("admin.allTournaments")}</option>
             {(campeonatos ?? []).map((c) => (
               <option key={c.id} value={String(c.id)}>
                 {c.nome}
@@ -208,8 +231,8 @@ function AdminInscricoesPage() {
 
       {!isLoading && !error && filtradas.length === 0 && (
         <EmptyState
-          title="Nenhuma inscrição encontrada"
-          description="Ajuste os filtros ou aguarde novas inscrições."
+          title={t("admin.noRegistrations")}
+          description={t("admin.noRegistrationsDesc")}
         />
       )}
 
@@ -220,19 +243,19 @@ function AdminInscricoesPage() {
               <thead className="bg-obsidian border-b border-obsidian-border">
                 <tr>
                   <th className="text-left p-4 uppercase tracking-widest text-xs text-muted-foreground font-bold">
-                    Campeonato
+                    {t("nav.tournaments")}
                   </th>
                   <th className="text-left p-4 uppercase tracking-widest text-xs text-muted-foreground font-bold">
-                    Time
+                    {t("admin.team")}
                   </th>
                   <th className="text-left p-4 uppercase tracking-widest text-xs text-muted-foreground font-bold">
-                    Status
+                    {t("common.status")}
                   </th>
                   <th className="text-left p-4 uppercase tracking-widest text-xs text-muted-foreground font-bold">
-                    Data
+                    {t("common.date")}
                   </th>
                   <th className="text-right p-4 uppercase tracking-widest text-xs text-muted-foreground font-bold">
-                    Ações
+                    {t("common.actions")}
                   </th>
                 </tr>
               </thead>
@@ -242,10 +265,18 @@ function AdminInscricoesPage() {
                     key={i.id}
                     inscricao={i}
                     disabled={anyPending}
-                    onAprovar={() => handle(aprovar, i.id, "Inscrição aprovada")}
-                    onReprovar={() => handle(reprovar, i.id, "Inscrição reprovada")}
-                    onEliminar={() => handle(eliminar, i.id, "Time eliminado")}
-                    onCampeao={() => handle(campeao, i.id, "Campeão definido!")}
+                    onAprovar={() =>
+                      handle(aprovar, i.id, t("admin.registrationApproved"))
+                    }
+                    onReprovar={() =>
+                      handle(reprovar, i.id, t("admin.registrationRejected"))
+                    }
+                    onEliminar={() =>
+                      handle(eliminar, i.id, t("admin.teamEliminated"))
+                    }
+                    onCampeao={() =>
+                      handle(campeao, i.id, t("admin.championSet"))
+                    }
                     onRemover={() => handleRemover(i)}
                     loadingAprovar={aprovar.isPending}
                     loadingReprovar={reprovar.isPending}
@@ -290,6 +321,7 @@ function InscricaoRow({
   loadingCampeao: boolean;
   loadingRemover: boolean;
 }) {
+  const { t, i18n } = useTranslation();
   const kind = statusInscricaoKind(i.status);
 
   return (
@@ -306,14 +338,14 @@ function InscricaoRow({
           <p className="text-xs text-muted-foreground">[{i.timeTag}]</p>
         )}
         <p className="text-[10px] text-muted-foreground tabular-nums">
-          {i.totalJogadores} jogador(es)
+          {t("admin.playersCount", { count: i.totalJogadores })}
         </p>
       </td>
       <td className="p-4">
         <InscricaoStatusBadge status={i.status} />
       </td>
       <td className="p-4 text-muted-foreground text-xs tabular-nums whitespace-nowrap">
-        {safeFormat(i.dataInscricao)}
+        {safeFormat(i.dataInscricao, getDateLocale(i18n.language))}
       </td>
       <td className="p-4">
         <div className="flex flex-wrap justify-end gap-1.5">
@@ -325,7 +357,7 @@ function InscricaoRow({
                 disabled={disabled}
                 loading={loadingAprovar}
                 onClick={onAprovar}
-                title="Aprovar inscrição"
+                title={t("admin.approveRegistration")}
               >
                 <Check className="size-3.5" />
               </CyberButton>
@@ -335,7 +367,7 @@ function InscricaoRow({
                 disabled={disabled}
                 loading={loadingReprovar}
                 onClick={onReprovar}
-                title="Reprovar (marca como cancelada)"
+                title={t("admin.rejectRegistration")}
               >
                 <X className="size-3.5" />
               </CyberButton>
@@ -349,7 +381,7 @@ function InscricaoRow({
                 disabled={disabled}
                 loading={loadingEliminar}
                 onClick={onEliminar}
-                title="Eliminar do campeonato"
+                title={t("admin.eliminateTeam")}
               >
                 <Skull className="size-3.5" />
               </CyberButton>
@@ -359,7 +391,7 @@ function InscricaoRow({
                 disabled={disabled}
                 loading={loadingCampeao}
                 onClick={onCampeao}
-                title="Definir campeão"
+                title={t("admin.setChampion")}
               >
                 <Award className="size-3.5" />
               </CyberButton>
@@ -371,7 +403,7 @@ function InscricaoRow({
             disabled={disabled}
             loading={loadingRemover}
             onClick={onRemover}
-            title="Remover inscrição permanentemente (libera exclusão do time)"
+            title={t("admin.removeRegistration")}
           >
             <Trash2 className="size-3.5" />
           </CyberButton>

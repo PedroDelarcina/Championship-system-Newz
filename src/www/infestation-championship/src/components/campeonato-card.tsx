@@ -1,22 +1,25 @@
 import { Link } from "@tanstack/react-router";
 import { Calendar, Users, Trophy } from "lucide-react";
 import { format, parseISO } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import type { Locale } from "date-fns";
+import { useTranslation } from "react-i18next";
 import { StatusBadge } from "@/components/status-badge";
 import { statusCampeonatoKind } from "@/lib/status";
+import { getDateLocale } from "@/lib/date-locale";
 import type { Campeonato } from "@/types/api";
 import { cn } from "@/lib/utils";
 
-function safeFormat(d?: string) {
+function safeFormat(d: string | undefined, locale: Locale) {
   if (!d) return "—";
   try {
-    return format(parseISO(d), "dd MMM", { locale: ptBR }).toUpperCase();
+    return format(parseISO(d), "dd MMM", { locale }).toUpperCase();
   } catch {
     return "—";
   }
 }
 
 export function CampeonatoCard({ c }: { c: Campeonato }) {
+  const { t, i18n } = useTranslation();
   const kind = statusCampeonatoKind(c.status);
   const borderColor =
     kind === "disabled"
@@ -72,21 +75,21 @@ export function CampeonatoCard({ c }: { c: Campeonato }) {
         <div className="grid grid-cols-2 gap-3 mb-6 mt-auto">
           <div className="bg-obsidian border border-obsidian-border p-3">
             <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest mb-1 flex items-center gap-1">
-              <Users className="size-3" /> Vagas
+              <Users className="size-3" /> {t("tournaments.slots")}
             </p>
             <p className="text-xl font-bold tracking-wider">
               {vagasRestantes}
               <span className="text-muted-foreground text-sm">
-                inscritos
+                {t("tournaments.registered")}
               </span>
             </p>
           </div>
           <div className="bg-obsidian border border-obsidian-border p-3">
             <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest mb-1 flex items-center gap-1">
-              <Calendar className="size-3" /> Início
+              <Calendar className="size-3" /> {t("tournaments.start")}
             </p>
             <p className="text-xl font-bold tracking-wider">
-              {safeFormat(c.dataInicio)}
+              {safeFormat(c.dataInicio, getDateLocale(i18n.language))}
             </p>
           </div>
         </div>
@@ -103,7 +106,7 @@ export function CampeonatoCard({ c }: { c: Campeonato }) {
             kind === "finished" && "group-hover:bg-obsidian-light",
           )}
         >
-          Ver Detalhes
+          {t("tournaments.viewDetails")}
         </Link>
       </div>
     </article>
