@@ -424,6 +424,6 @@ FodyWeavers.xsd
 # Ignorar pastas padrao do .NET
 **/bin/
 **/obj/
-**/Migrations/
+
 
 *.env
