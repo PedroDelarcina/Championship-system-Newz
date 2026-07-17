@@ -20,7 +20,7 @@
     "email": "Correo electrónico",
     "password": "Contraseña",
     "unknownError": "Error desconocido",
-    "networkError": "No se pudo conectar a la API. Verifique que el backend C# esté ejecutándose en {{url}}",
+    "networkError": "Error desconocido",
     "seeAll": "Ver todos",
     "backToHome": "Volver al inicio",
     "menu": "Menú"

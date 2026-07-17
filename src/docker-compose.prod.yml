@@ -3,6 +3,8 @@ services:
     build:
       context: ./www/infestation-championship
       dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: "https://api.infestationchampionship.tech/api"
     container_name: infestation-frontend-prod
     ports:
       - "8080:8080"
