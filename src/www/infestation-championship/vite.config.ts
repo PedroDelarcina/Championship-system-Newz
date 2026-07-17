@@ -9,6 +9,10 @@ export default defineConfig({
     },
     server: {
       port: 8080,
+      allowedHosts: [
+        "infestationchampionship.tech",
+        "www.infestationchampionship.tech"
+      ]
     },
   },
 });
