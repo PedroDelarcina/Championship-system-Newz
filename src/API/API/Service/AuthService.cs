@@ -49,7 +49,7 @@ namespace API.Service
                 UserName = registroDto.Email,
                 Email = registroDto.Email,
                 Nome = registroDto.Nome,
-                IsAdmin = true,
+                IsAdmin = false,
                 NickName = registroDto.Nickname,
                 DataRegistro = DateTime.UtcNow
             };
