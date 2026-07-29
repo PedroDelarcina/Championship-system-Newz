@@ -1,0 +1,43 @@
+name: Deploy para VPS
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Conectar na VPS e realizar deploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -e
+
+            cd /root/Championship-system-Newz
+
+            echo "Atualizando repositório..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            cd src
+
+            echo "Validando Docker Compose de produção..."
+            docker compose -f docker-compose.prod.yml config --quiet
+
+            echo "Construindo e atualizando containers..."
+            docker compose -f docker-compose.prod.yml up -d --build --remove-orphans
+
+            echo "Removendo imagens antigas sem uso..."
+            docker image prune -f
+
+            echo "Containers ativos:"
+            docker compose -f docker-compose.prod.yml ps
