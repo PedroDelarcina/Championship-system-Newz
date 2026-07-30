@@ -49,7 +49,8 @@ namespace Infrastructure.Data
                 entity.HasOne(i => i.Time)
                     .WithMany(t => t.Inscricoes)
                     .HasForeignKey(i => i.TimeId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired(false);
 
                 entity.HasOne(i => i.Usuario)
                     .WithMany(u => u.Inscricoes)
@@ -72,9 +73,11 @@ namespace Infrastructure.Data
             {
                 entity.HasKey(c => c.Id);
                 entity.Property(c => c.Nome).IsRequired().HasMaxLength(100);
-                entity.Property(c => c.TipoCampeonato).IsRequired().HasMaxLength(50);
+                entity.Property(c => c.TipoCampeonato)
+                      .IsRequired()
+                      .HasMaxLength(50)
+                      .HasConversion<string>();
 
-                
                 entity.HasIndex(c => c.DataInicio);
                 entity.HasIndex(c => c.IsAtivo);
             });

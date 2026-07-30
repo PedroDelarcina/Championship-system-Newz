@@ -179,6 +179,7 @@
     "leaderOnlyRegister": "Apenas o líder pode inscrever o time",
     "alreadyRegistered": "Seu time já está inscrito",
     "registerTeam": "Inscrever Time",
+    "registerNow": "Inscrever-se Agora",
     "registrationSent": "Inscrição enviada! Aguardando aprovação."
   },
   "teams": {
@@ -251,6 +252,7 @@
     "endDate": "Data Fim",
     "rulesDescription": "Descrição das regras",
     "extraRules": "Regras extras",
+    "selectType": "Selecione o tipo",
     "typePlaceholder": "Ex: ClanxClan",
     "statusToggled": "Status alternado",
     "tournamentDeleted": "Campeonato deletado",

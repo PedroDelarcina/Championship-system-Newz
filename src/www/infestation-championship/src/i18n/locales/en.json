@@ -179,6 +179,7 @@
     "leaderOnlyRegister": "Only the leader can register the team",
     "alreadyRegistered": "Your team is already registered",
     "registerTeam": "Register Team",
+    "registerNow": "Register Now",
     "registrationSent": "Registration submitted! Awaiting approval."
   },
   "teams": {
@@ -251,6 +252,7 @@
     "endDate": "End Date",
     "rulesDescription": "Rules description",
     "extraRules": "Extra rules",
+    "selectType": "Select the type",
     "typePlaceholder": "Ex: ClanxClan",
     "statusToggled": "Status toggled",
     "tournamentDeleted": "Tournament deleted",

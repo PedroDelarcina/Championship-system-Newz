@@ -1,8 +1,4 @@
-﻿using Core.DTOs.Time;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Core.DTOs.Inscricao
 {
@@ -11,8 +7,6 @@ namespace Core.DTOs.Inscricao
         [Required(ErrorMessage = "ID do campeonato é obrigatório")]
         public int CampeonatoId { get; set; }
 
-        [Required(ErrorMessage = "Dados do time são obrigatórios")]
-        public int TimeId { get; set; }
-
+        public int? TimeId { get; set; }
     }
 }

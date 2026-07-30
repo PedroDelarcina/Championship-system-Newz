@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Core.Entities.Enums;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace Core.DTOs.Campeonato
 {
@@ -13,7 +11,7 @@ namespace Core.DTOs.Campeonato
         public string Nome { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Tipo é obrigatório")]
-        public string TipoCampeonato { get; set; } = string.Empty; // "ClanxClan", "Solo", "Dupla", "Trios", "5x5"
+        public TipoCampeonato TipoCampeonato { get; set; }
 
         [Required(ErrorMessage = "Descrição das regras é obrigatória")]
         public string DescricaoRegras { get; set; } = string.Empty;

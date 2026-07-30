@@ -14,7 +14,7 @@ import {
   useUpdateCampeonato,
   type CampeonatoFormData,
 } from "@/hooks/api";
-import { CyberInput, CyberTextarea } from "@/components/cyber-input";
+import { CyberInput, CyberSelect, CyberTextarea } from "@/components/cyber-input";
 import { CyberButton } from "@/components/cyber-button";
 import { StatusBadge } from "@/components/status-badge";
 import { ErrorBox, PageHeader, PageLoader } from "@/components/ui-blocks";
@@ -29,9 +29,19 @@ export const Route = createFileRoute("/admin/campeonatos")({
   component: AdminCampeonatosPage,
 });
 
+const TIPOS_CAMPEONATO = [
+  "ClansxClans",
+  "Solo",
+  "Duplas",
+  "Trios",
+  "Times",
+] as const;
+
 const schema = z.object({
   nome: z.string().trim().min(2).max(120),
-  tipoCampeonato: z.string().trim().min(2).max(50),
+  tipoCampeonato: z.enum(TIPOS_CAMPEONATO, {
+    errorMap: () => ({ message: "Selecione um tipo de campeonato" }),
+  }),
   descricaoRegras: z.string().trim().min(1).max(5000),
   maxParticipantes: z.coerce.number().int().min(2).max(256),
   dataInicio: z.string().min(1),
@@ -230,14 +240,14 @@ function CampeonatoFormModal({
     defaultValues: campeonato
       ? {
           nome: campeonato.nome,
-          tipoCampeonato: campeonato.tipo,
+          tipoCampeonato: campeonato.tipo as FormData["tipoCampeonato"],
           descricaoRegras: campeonato.descricaoRegras ?? "",
           maxParticipantes: Math.max(campeonato.totalInscricoes, 2),
           dataInicio: campeonato.dataInicio?.slice(0, 10) ?? "",
           dataFim: campeonato.dataFim?.slice(0, 10) ?? "",
           regrasExtras: campeonato.regrasExtras ?? "",
         }
-      : { maxParticipantes: 16, tipoCampeonato: "ClanxClan", descricaoRegras: "" },
+      : { maxParticipantes: 16, tipoCampeonato: "ClansxClans", descricaoRegras: "" },
   });
 
   const onSubmit = async (data: FormData) => {
@@ -287,12 +297,20 @@ function CampeonatoFormModal({
             {...register("nome")}
           />
           <div className="grid grid-cols-2 gap-4">
-            <CyberInput
+            <CyberSelect
               label={t("common.type")}
-              placeholder={t("admin.typePlaceholder")}
               error={errors.tipoCampeonato?.message}
               {...register("tipoCampeonato")}
-            />
+            >
+              <option value="" disabled>
+                {t("admin.selectType")}
+              </option>
+              {TIPOS_CAMPEONATO.map((tipo) => (
+                <option key={tipo} value={tipo} className="bg-obsidian">
+                  {tipo}
+                </option>
+              ))}
+            </CyberSelect>
             <CyberInput
               label={t("admin.maxParticipants")}
               type="number"

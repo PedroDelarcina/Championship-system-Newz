@@ -13,6 +13,7 @@ namespace Core.Interfaces.Services
         Task<IEnumerable<InscricaoListDto>> ObterMinhasInscricoesAsync(string usuarioId, CancellationToken cancellationToken);
         Task<IEnumerable<InscricaoListDto>> ObterInscricoesCampeonatoAsync(int campeonatoId, CancellationToken cancellationToken);
         Task<AuthResult<int>> InscreverTimeCampeonatoAsync(InscricaoRequestDto inscricaoRequestDto, string usuarioId, CancellationToken cancellationToken);
+        Task<AuthResult<int>> InscreverUsuarioSoloAsync(int campeonatoId, string usuarioId, CancellationToken cancellationToken);
         Task<AuthResult<bool>> CancelarInscricaoAsync(int inscricaoId, string usuarioId, CancellationToken cancellationToken);
         Task<AuthResult<bool>> AprovarInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
         Task<AuthResult<bool>> RejeitarInscricaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken);
