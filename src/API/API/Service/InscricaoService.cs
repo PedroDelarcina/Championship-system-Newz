@@ -43,11 +43,13 @@ namespace API.Service
                 CampeonatoNome = i.Campeonato?.Nome ?? "Campeonato não encontrado",
                 CampeonatoId = i.CampeonatoId,
                 CampeonatoDataInicio = i.Campeonato?.DataInicio ?? DateTime.MinValue,
-                TimeNome = i.Time?.Nome ?? "Time não encontrado",
+                TimeNome = i.Time?.Nome ?? (i.TimeId == null ? (i.Usuario?.NickName ?? "Solo") : "Time não encontrado"),
                 TimeTag = i.Time?.Clantag ?? string.Empty,
                 TimeId = i.TimeId,
                 LogoUrl = i.Time?.LogoUrl,
-                TotalJogadores = i.Time?.Players.Count ?? 0
+                TotalJogadores = i.Time?.Players.Count ?? 0,
+                UsuarioNickName = i.Usuario?.NickName,
+                UsuarioId = i.UsuarioId
             });
         }
         /*   public async Task<InscricaoResponseDto?> ObterInscricaoPorIdAsync(int id, string usuarioLogadoId, CancellationToken cancellationToken)
@@ -109,11 +111,13 @@ namespace API.Service
                 CampeonatoNome = i.Campeonato?.Nome ?? "Campeonato não encontrado",
                 CampeonatoId = i.CampeonatoId,
                 CampeonatoDataInicio = i.Campeonato?.DataInicio ?? DateTime.MinValue,
-                TimeNome = i.Time?.Nome ?? "Time não encontrado",
+                TimeNome = i.Time?.Nome ?? (i.TimeId == null ? (i.Usuario?.NickName ?? "Solo") : "Time não encontrado"),
                 TimeTag = i.Time?.Clantag ?? string.Empty,
                 TimeId = i.TimeId,
                 LogoUrl = i.Time?.LogoUrl,
-                TotalJogadores = i.Time?.Players.Count ?? 0
+                TotalJogadores = i.Time?.Players.Count ?? 0,
+                UsuarioNickName = i.Usuario?.NickName,
+                UsuarioId = i.UsuarioId
             }); 
         }
 
@@ -129,11 +133,13 @@ namespace API.Service
                 CampeonatoNome = i.Campeonato?.Nome ?? "Campeonato não encontrado",
                 CampeonatoId = i.CampeonatoId,
                 CampeonatoDataInicio = i.Campeonato?.DataInicio ?? DateTime.MinValue,
-                TimeNome = i.Time?.Nome ?? "Time não encontrado",
+                TimeNome = i.Time?.Nome ?? (i.TimeId == null ? (i.Usuario?.NickName ?? "Solo") : "Time não encontrado"),
                 TimeTag = i.Time?.Clantag ?? string.Empty,
                 TimeId = i.TimeId,
                 LogoUrl = i.Time?.LogoUrl,
-                TotalJogadores = i.Time?.Players.Count ?? 0
+                TotalJogadores = i.Time?.Players.Count ?? 0,
+                UsuarioNickName = i.Usuario?.NickName,
+                UsuarioId = i.UsuarioId
             });
         }
 
@@ -155,13 +161,23 @@ namespace API.Service
             if (inscricao == null)
                 return AuthResult<bool>.FailureResult("Inscrição não encontrada.", 404);
 
-            var time = await _timeRepository.GetTimeWithJogadoresAsync(inscricao.TimeId, cancellationToken);
+            var isAdmin = await _appDbContext.Users.AnyAsync(u => u.Id == usuarioId && u.IsAdmin, cancellationToken);
+            var isProprioUsuario = inscricao.UsuarioId == usuarioId;
 
-            var isLider = time?.Players?.Any(p => p.UsuarioId == usuarioId && p.isLider) ?? false;  
-            var isAdmin = await _appDbContext.Users.AnyAsync(u => u.Id == usuarioId && u.IsAdmin, cancellationToken);   
-
-            if(!isLider && !isAdmin)
-                return AuthResult<bool>.FailureResult("Apenas o líder do time ou um administrador pode cancelar a inscrição.", 403);
+            if (!isProprioUsuario && !isAdmin)
+            {
+                if (inscricao.TimeId != null)
+                {
+                    var time = await _timeRepository.GetTimeWithJogadoresAsync(inscricao.TimeId.Value, cancellationToken);
+                    var isLider = time?.Players?.Any(p => p.UsuarioId == usuarioId && p.isLider) ?? false;
+                    if (!isLider)
+                        return AuthResult<bool>.FailureResult("Apenas o líder do time, o próprio usuário ou um administrador pode cancelar a inscrição.", 403);
+                }
+                else
+                {
+                    return AuthResult<bool>.FailureResult("Apenas o próprio usuário ou um administrador pode cancelar a inscrição.", 403);
+                }
+            }
 
             var campeonato = await _campeonatoRepository.GetByIdAsync(inscricao.CampeonatoId, cancellationToken);
             if (campeonato != null && campeonato.DataInicio <= DateTime.UtcNow)
@@ -176,7 +192,7 @@ namespace API.Service
 
         public async Task<AuthResult<bool>> DefinirCampeaoAsync(int inscricaoId, string adminUserId, CancellationToken cancellationToken)
         {
-           var inscricao = await _inscricaoRepository.GetByIdAsync(inscricaoId, cancellationToken);
+            var inscricao = await _inscricaoRepository.GetByIdAsync(inscricaoId, cancellationToken);
             if (inscricao == null)
                 return AuthResult<bool>.FailureResult("Inscrição não encontrada ou já processada.", 404);
 
@@ -185,12 +201,19 @@ namespace API.Service
             var campeonato = await _campeonatoRepository.GetByIdAsync(inscricao.CampeonatoId, cancellationToken);
             if (campeonato != null)
             {
-                var time = await _timeRepository.GetByIdAsync(inscricao.TimeId, cancellationToken);
-                campeonato.Campeao = time?.Nome ?? "Time Campeão";
+                if (inscricao.TimeId != null)
+                {
+                    var time = await _timeRepository.GetByIdAsync(inscricao.TimeId.Value, cancellationToken);
+                    campeonato.Campeao = time?.Nome ?? "Time Campeão";
+                }
+                else
+                {
+                    campeonato.Campeao = inscricao.Usuario?.NickName ?? "Jogador Campeão";
+                }
                 await _campeonatoRepository.UpdateAsync(campeonato, cancellationToken);
             }
 
-            _logger.LogInformation($"Time definido como campeão (inscrição {inscricaoId} definida como campeã pelo admin {adminUserId}.");
+            _logger.LogInformation($"Inscrição {inscricaoId} definida como campeã pelo admin {adminUserId}.");
 
             return AuthResult<bool>.SuccessResult(true);
         }
@@ -209,6 +232,9 @@ namespace API.Service
 
         public async Task<AuthResult<int>> InscreverTimeCampeonatoAsync(InscricaoRequestDto inscricaoRequestDto, string usuarioId, CancellationToken cancellationToken) 
         {
+            if (inscricaoRequestDto.TimeId == null)
+                return AuthResult<int>.FailureResult("ID do time é obrigatório para inscrição em equipe.", 400);
+
             var campeonato = await _campeonatoRepository.GetByIdAsync(inscricaoRequestDto.CampeonatoId, cancellationToken);
 
             if (campeonato == null)
@@ -217,7 +243,7 @@ namespace API.Service
             if(campeonato.DataInicio <= DateTime.UtcNow)
                 return AuthResult<int>.FailureResult("Não é possível se inscrever em um campeonato que já começou.", 400);
 
-            var time = await _timeRepository.GetTimeWithJogadoresAsync(inscricaoRequestDto.TimeId, cancellationToken);
+            var time = await _timeRepository.GetTimeWithJogadoresAsync(inscricaoRequestDto.TimeId.Value, cancellationToken);
             if(time == null)
                 return AuthResult<int>.FailureResult("Time não encontrado.", 404);
 
@@ -227,7 +253,7 @@ namespace API.Service
 
             var inscricaoExistente = await _inscricaoRepository.GetInscricaoByCampeonatoAndTimeAsync(
                 inscricaoRequestDto.CampeonatoId,
-                inscricaoRequestDto.TimeId,
+                inscricaoRequestDto.TimeId.Value,
                 cancellationToken);
 
             if (inscricaoExistente != null &&
@@ -246,7 +272,7 @@ namespace API.Service
             var inscricao = new Inscricao
             {
                 CampeonatoId = inscricaoRequestDto.CampeonatoId,
-                TimeId = inscricaoRequestDto.TimeId,
+                TimeId = inscricaoRequestDto.TimeId.Value,
                 UsuarioId = usuarioId,
                 DataInscricao = DateTime.UtcNow,
                 Status = StatusInscricao.Pendente
@@ -255,6 +281,44 @@ namespace API.Service
             var result = await _inscricaoRepository.AddAsync(inscricao, cancellationToken);
 
             _logger.LogInformation($"Time {time.Nome} inscrito no campeonato {campeonato.Nome} pelo usuário {usuarioId}.");
+
+            return AuthResult<int>.SuccessResult(result.Id);
+        }
+
+        public async Task<AuthResult<int>> InscreverUsuarioSoloAsync(int campeonatoId, string usuarioId, CancellationToken cancellationToken)
+        {
+            var campeonato = await _campeonatoRepository.GetByIdAsync(campeonatoId, cancellationToken);
+
+            if (campeonato == null)
+                return AuthResult<int>.FailureResult("Campeonato não encontrado.", 404);
+
+            if (campeonato.TipoCampeonato != TipoCampeonato.Solo)
+                return AuthResult<int>.FailureResult("Este campeonato não é do tipo Solo.", 400);
+
+            if (campeonato.DataInicio <= DateTime.UtcNow)
+                return AuthResult<int>.FailureResult("Não é possível se inscrever em um campeonato que já começou.", 400);
+
+            var jaInscrito = await _inscricaoRepository.UsuarioInscritoSoloCampeonatoAsync(campeonatoId, usuarioId, cancellationToken);
+            if (jaInscrito)
+                return AuthResult<int>.FailureResult("Você já possui inscrição ativa neste campeonato.", 400);
+
+            var totalSolo = await _inscricaoRepository.GetTotalInscritoSoloCampeonatoAsync(campeonatoId, cancellationToken);
+            var totalInscricoes = await _inscricaoRepository.GetTotalInscritoCampeonatoAsync(campeonatoId, cancellationToken);
+            if (totalSolo + totalInscricoes >= campeonato.MaxParticipantes)
+                return AuthResult<int>.FailureResult("Número máximo de inscrições atingido para este campeonato.", 400);
+
+            var inscricao = new Inscricao
+            {
+                CampeonatoId = campeonatoId,
+                TimeId = null,
+                UsuarioId = usuarioId,
+                DataInscricao = DateTime.UtcNow,
+                Status = StatusInscricao.Pendente
+            };
+
+            var result = await _inscricaoRepository.AddAsync(inscricao, cancellationToken);
+
+            _logger.LogInformation($"Usuário {usuarioId} inscrito no campeonato solo {campeonato.Nome}.");
 
             return AuthResult<int>.SuccessResult(result.Id);
         }
@@ -282,8 +346,18 @@ namespace API.Service
                 var campeonato = await _campeonatoRepository.GetByIdAsync(inscricao.CampeonatoId, cancellationToken);
                 if (campeonato != null)
                 {
-                    var time = await _timeRepository.GetByIdAsync(inscricao.TimeId, cancellationToken);
-                    if (time != null && campeonato.Campeao == time.Nome)
+                    string? nomeCampeao = null;
+                    if (inscricao.TimeId != null)
+                    {
+                        var time = await _timeRepository.GetByIdAsync(inscricao.TimeId.Value, cancellationToken);
+                        nomeCampeao = time?.Nome;
+                    }
+                    else
+                    {
+                        nomeCampeao = inscricao.Usuario?.NickName;
+                    }
+
+                    if (nomeCampeao != null && campeonato.Campeao == nomeCampeao)
                     {
                         campeonato.Campeao = null;
                         await _campeonatoRepository.UpdateAsync(campeonato, cancellationToken);

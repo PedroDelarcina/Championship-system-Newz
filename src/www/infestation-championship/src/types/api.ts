@@ -76,9 +76,11 @@ export interface CampeonatoResponseDto {
   status?: StatusCampeonato;
 }
 
+export type TipoCampeonato = "ClansxClans" | "Solo" | "Duplas" | "Trios" | "Times";
+
 export interface CampeonatoRequestDto {
   nome: string;
-  tipoCampeonato: string;
+  tipoCampeonato: TipoCampeonato;
   descricaoRegras: string;
   maxParticipantes: number;
   dataInicio: string;
@@ -138,14 +140,16 @@ export interface InscricaoListDto {
   campeonatoDataInicio: string;
   timeNome: string;
   timeTag: string;
-  timeId: number;
+  timeId?: number | null;
   logoUrl?: string | null;
   totalJogadores: number;
+  usuarioNickName?: string | null;
+  usuarioId?: string | null;
 }
 
 export interface InscricaoRequestDto {
   campeonatoId: number;
-  timeId: number;
+  timeId?: number | null;
 }
 
 export interface CampeonatoDetalhes extends CampeonatoResponseDto {

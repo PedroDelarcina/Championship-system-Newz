@@ -31,6 +31,16 @@ namespace Infrastructure.Repositories
             return await _dbSet.FirstOrDefaultAsync(i => i.CampeonatoId == campeonatoId && i.TimeId == timeId, cancellationToken);
         }
 
+        public async Task<Inscricao?> GetInscricaoByCampeonatoAndUsuarioAsync(int campeonatoId, string usuarioId, CancellationToken cancellationToken)
+        {
+            return await _dbSet.FirstOrDefaultAsync(i => i.CampeonatoId == campeonatoId && i.UsuarioId == usuarioId && i.TimeId == null, cancellationToken);
+        }
+
+        public async Task<bool> UsuarioInscritoSoloCampeonatoAsync(int campeonatoId, string usuarioId, CancellationToken cancellationToken)
+        {
+            return await _dbSet.AnyAsync(i => i.CampeonatoId == campeonatoId && i.UsuarioId == usuarioId && i.TimeId == null, cancellationToken);
+        }
+
         public async Task<IEnumerable<Inscricao>> GetInscricoesByCampeonatoIdAsync(int campeonatoId, CancellationToken cancellationToken)
         {
             return await _dbSet
@@ -63,6 +73,16 @@ namespace Infrastructure.Repositories
         public async Task<bool> TimeInscritoCampeonatoAsync(int campeonatoId, int timeId, CancellationToken cancellationToken)
         {
             return await _dbSet.AnyAsync(i => i.CampeonatoId == campeonatoId && i.TimeId == timeId, cancellationToken);
+        }
+
+        public async Task<int> GetTotalInscritoSoloCampeonatoAsync(int campeonatoId, CancellationToken cancellationToken)
+        {
+            return await _dbSet.CountAsync(
+                i => i.CampeonatoId == campeonatoId && i.TimeId == null &&
+                     (i.Status == StatusInscricao.Pendente ||
+                      i.Status == StatusInscricao.Confirmado ||
+                      i.Status == StatusInscricao.Campeao),
+                cancellationToken);
         }
 
         public async Task<int> GetTotalInscritoCampeonatoAsync(int campeonatoId, CancellationToken cancellationToken)

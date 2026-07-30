@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import {
   useCampeonato,
   useInscreverCampeonato,
+  useInscreverSolo,
   useMeusTimes,
 } from "@/hooks/api";
 import { CyberButton } from "@/components/cyber-button";
@@ -50,6 +51,7 @@ function CampeonatoDetalhePage() {
   const { user } = useAuthStore();
   const { data: meusTimes } = useMeusTimes();
   const inscrever = useInscreverCampeonato();
+  const inscreverSolo = useInscreverSolo();
   const dateLocale = getDateLocale(i18n.language);
 
   if (isLoading) {
@@ -81,35 +83,55 @@ function CampeonatoDetalhePage() {
   const kind = statusCampeonatoKind(c.status);
   const totalInscritos = c.totalInscricoes ?? c.inscricoes?.length ?? 0;
 
+  const isSolo = c.tipo === "Solo";
   const meuTime = meusTimes?.[0];
   const souLider = meuTime ? String(meuTime.liderId) === String(user?.id) : false;
-  const jaInscrito = meuTime
-    ? c.inscricoes?.some((i) => {
-        const mesmoTime =
-          (typeof i.timeId === "number" &&
-            i.timeId > 0 &&
-            i.timeId === meuTime.id) ||
-          (!i.timeId && i.timeNome === meuTime.nome);
-        return (
-          mesmoTime && String(i.status).toLowerCase() !== "cancelado"
-        );
-      })
-    : false;
 
-  const podeInscrever =
+  const jaInscrito = isSolo
+    ? c.inscricoes?.some(
+        (i) =>
+          String(i.usuarioId) === String(user?.id) &&
+          String(i.status).toLowerCase() !== "cancelado",
+      )
+    : meuTime
+      ? c.inscricoes?.some((i) => {
+          const mesmoTime =
+            (typeof i.timeId === "number" &&
+              i.timeId > 0 &&
+              i.timeId === meuTime.id) ||
+            (!i.timeId && i.timeNome === meuTime.nome);
+          return (
+            mesmoTime && String(i.status).toLowerCase() !== "cancelado"
+          );
+        })
+      : false;
+
+  const podeInscreverTime =
     !!user &&
     !!meuTime &&
     souLider &&
+    !jaInscrito &&
+    kind === "open" &&
+    c.isAtivo !== false &&
+    !isSolo;
+
+  const podeInscreverSolo =
+    !!user &&
+    isSolo &&
     !jaInscrito &&
     kind === "open" &&
     c.isAtivo !== false;
 
   const handleInscrever = async () => {
     try {
-      await inscrever.mutateAsync({
-        campeonatoId: Number(c.id),
-        timeId: Number(meuTime?.id),
-      });
+      if (isSolo) {
+        await inscreverSolo.mutateAsync(Number(c.id));
+      } else {
+        await inscrever.mutateAsync({
+          campeonatoId: Number(c.id),
+          timeId: Number(meuTime?.id),
+        });
+      }
       toast.success(t("tournaments.registrationSent"));
     } catch (e) {
       toast.error(getApiErrorMessage(e));
@@ -265,7 +287,7 @@ function CampeonatoDetalhePage() {
               {t("tournaments.loginToRegister")}
             </Link>
           )}
-          {user && !meuTime && (
+          {user && !isSolo && !meuTime && (
             <Link
               to="/meus-times/novo"
               className="cyber-cut block text-center bg-blood text-white font-bold uppercase tracking-widest text-sm px-6 py-4 hover:bg-blood-bright transition-colors glow-blood"
@@ -273,7 +295,7 @@ function CampeonatoDetalhePage() {
               {t("tournaments.createTeamToJoin")}
             </Link>
           )}
-          {user && meuTime && !souLider && (
+          {user && !isSolo && meuTime && !souLider && (
             <div className="cyber-cut bg-obsidian-light border border-obsidian-border p-4 text-center text-xs text-muted-foreground uppercase tracking-wider flex items-center justify-center gap-2">
               <ShieldCheck className="size-4" />
               {t("tournaments.leaderOnlyRegister")}
@@ -284,7 +306,7 @@ function CampeonatoDetalhePage() {
               {t("tournaments.alreadyRegistered")}
             </div>
           )}
-          {podeInscrever && (
+          {podeInscreverTime && (
             <CyberButton
               size="lg"
               loading={inscrever.isPending}
@@ -292,6 +314,16 @@ function CampeonatoDetalhePage() {
               className="w-full"
             >
               {t("tournaments.registerTeam")}
+            </CyberButton>
+          )}
+          {podeInscreverSolo && (
+            <CyberButton
+              size="lg"
+              loading={inscreverSolo.isPending}
+              onClick={handleInscrever}
+              className="w-full"
+            >
+              {t("tournaments.registerNow")}
             </CyberButton>
           )}
         </aside>

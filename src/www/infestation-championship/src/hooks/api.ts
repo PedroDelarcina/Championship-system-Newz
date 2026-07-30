@@ -151,6 +151,17 @@ export function useInscreverCampeonato() {
   });
 }
 
+export function useInscreverSolo() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (campeonatoId: number) =>
+      apiPost<unknown>(`/Inscricao/solo/${campeonatoId}`),
+    onSuccess: (_d, campeonatoId) => {
+      qc.invalidateQueries({ queryKey: ["campeonato", campeonatoId] });
+    },
+  });
+}
+
 // ============ INSCRIÇÕES (admin) ============
 export function useInscricoes() {
   return useQuery({

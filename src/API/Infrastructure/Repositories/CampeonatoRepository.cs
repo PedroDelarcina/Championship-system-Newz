@@ -1,10 +1,8 @@
 ﻿using Core.Entities;
+using Core.Entities.Enums;
 using Core.Interfaces.Repositories;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Repositories
 {
@@ -38,7 +36,7 @@ namespace Infrastructure.Repositories
                                .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
         }
 
-        public async Task<IEnumerable<Campeonato>> GetCampeonatosByTipoAsync(string tipo, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Campeonato>> GetCampeonatosByTipoAsync(TipoCampeonato tipo, CancellationToken cancellationToken)
         {
             return await _dbSet.Where(c => c.TipoCampeonato == tipo).OrderByDescending(c=> c.DataInicio).ToListAsync(cancellationToken);
         }

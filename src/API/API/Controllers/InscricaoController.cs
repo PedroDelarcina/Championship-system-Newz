@@ -146,6 +146,19 @@ namespace API.Controllers
         }
 
         /// <summary>
+        /// Inscrever usuário individualmente em um campeonato Solo
+        /// </summary>
+        [HttpPost("solo/{campeonatoId}")]
+        [Authorize]
+        public async Task<IActionResult> InscreverSolo(int campeonatoId, CancellationToken cancellationToken)
+        {
+            var usuarioId = GetUserId();
+
+            var result = await _inscricaoService.InscreverUsuarioSoloAsync(campeonatoId, usuarioId, cancellationToken);
+            return FromResult(result);
+        }
+
+        /// <summary>
         /// Cancelar a inscrição de um campeonato (apenas o líder do time ou admin podem cancelar) 
         /// </summary>
         [HttpDelete("{inscricaoId}/cancelarInscricao")]

@@ -179,6 +179,7 @@
     "leaderOnlyRegister": "Solo el líder puede inscribir al equipo",
     "alreadyRegistered": "Tu equipo ya está inscrito",
     "registerTeam": "Inscribir Equipo",
+    "registerNow": "Inscribirse Ahora",
     "registrationSent": "¡Inscripción enviada! Esperando aprobación."
   },
   "teams": {
@@ -251,6 +252,7 @@
     "endDate": "Fecha Fin",
     "rulesDescription": "Descripción de las reglas",
     "extraRules": "Reglas extras",
+    "selectType": "Seleccione el tipo",
     "typePlaceholder": "Ej: ClanxClan",
     "statusToggled": "Estado alternado",
     "tournamentDeleted": "Campeonato eliminado",

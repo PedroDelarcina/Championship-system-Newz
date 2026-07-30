@@ -34,7 +34,7 @@ namespace API.Service
             {
                 Id = c.Id,
                 Nome = c.Nome,
-                Tipo = c.TipoCampeonato,
+                Tipo = c.TipoCampeonato.ToString(),
                 DescricaoRegras = c.DescricaoRegras,
                 DataInicio = c.DataInicio,
                 DataFim = c.DataFim,
@@ -56,7 +56,7 @@ namespace API.Service
             {
                 Id = campeonato.Id,
                 Nome = campeonato.Nome,
-                Tipo = campeonato.TipoCampeonato,
+                Tipo = campeonato.TipoCampeonato.ToString(),
                 DescricaoRegras = campeonato.DescricaoRegras,
                 DataInicio = campeonato.DataInicio,
                 DataFim = campeonato.DataFim,
@@ -76,7 +76,7 @@ namespace API.Service
             {
                 Id = c.Id,
                 Nome = c.Nome,
-                Tipo = c.TipoCampeonato,
+                Tipo = c.TipoCampeonato.ToString(),
                 DescricaoRegras = c.DescricaoRegras,
                 DataInicio = c.DataInicio,
                 DataFim = c.DataFim,
