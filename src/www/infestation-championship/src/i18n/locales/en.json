@@ -20,7 +20,7 @@
     "email": "Email",
     "password": "Password",
     "unknownError": "Unknown error",
-    "networkError": "Could not connect to the API. Make sure the C# backend is running at {{url}}",
+    "networkError": "Internal server error",
     "seeAll": "See all",
     "backToHome": "Back to Home",
     "menu": "Menu"

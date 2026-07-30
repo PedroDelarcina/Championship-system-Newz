@@ -3,7 +3,8 @@ import i18n from "@/i18n";
 import { useAuthStore } from "@/stores/auth-store";
 import type { ApiResponse, TokenResponseDto, User } from "@/types/api";
 
-const defaultApiBase = "http://localhost:7180/api";
+const defaultApiBase =
+  import.meta.env.VITE_API_URL || "http://localhost:7180/api";
 
 declare module "axios" {
   export interface AxiosRequestConfig {
