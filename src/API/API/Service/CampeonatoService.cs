@@ -161,12 +161,12 @@ namespace API.Service
 
         public async Task<AuthResult<bool>> DeletarCampeonatoAsync(int id, string adminUserId, CancellationToken cancellationToken)
         {
-            var campeonato = await _campeonatoRepository.GetByIdAsync(id, cancellationToken);
+            var campeonato = await _campeonatoRepository.GetCampeonatoInscricoesAsync(id, cancellationToken);
             if (campeonato == null)
                 return AuthResult<bool>.FailureResult("Campeonato não encontrado", 404);
 
-            if (campeonato.Inscricoes != null && campeonato.Inscricoes.Any())
-                return AuthResult<bool>.FailureResult("Não é possivel  deletar um campeonato com inscrições ativas", 400);
+            if (campeonato.Inscricoes.Any())
+                return AuthResult<bool>.FailureResult("Não é possível excluir este campeonato porque existem equipes inscritas. Remova ou cancele todas as inscrições antes de excluir o campeonato.", 409);
 
             await _campeonatoRepository.DeleteAsync(campeonato, cancellationToken);
             _logger.LogInformation($"Campeonato deletado: {campeonato.Nome} por admin {adminUserId}");
