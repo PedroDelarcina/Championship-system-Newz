@@ -242,7 +242,9 @@ function CampeonatoFormModal({
           nome: campeonato.nome,
           tipoCampeonato: campeonato.tipo as FormData["tipoCampeonato"],
           descricaoRegras: campeonato.descricaoRegras ?? "",
-          maxParticipantes: Math.max(campeonato.totalInscricoes, 2),
+          maxParticipantes:
+            campeonato.maxParticipantes ??
+            Math.max(campeonato.totalInscricoes, 2),
           dataInicio: campeonato.dataInicio?.slice(0, 10) ?? "",
           dataFim: campeonato.dataFim?.slice(0, 10) ?? "",
           regrasExtras: campeonato.regrasExtras ?? "",

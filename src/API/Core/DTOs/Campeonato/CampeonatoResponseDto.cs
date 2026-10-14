@@ -15,6 +15,7 @@ namespace Core.DTOs.Campeonato
         public bool IsAtivo { get; set; }
         public string? Campeao { get; set; }
         public string? RegrasExtras { get; set; }
+        public int MaxParticipantes { get; set; }
         public int TotalInscricoes { get; set; }
         public string? Status { get; set; }
     }
