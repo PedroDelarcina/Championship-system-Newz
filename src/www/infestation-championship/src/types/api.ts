@@ -72,6 +72,7 @@ export interface CampeonatoResponseDto {
   isAtivo: boolean;
   campeao?: string | null;
   regrasExtras?: string | null;
+  maxParticipantes: number;
   totalInscricoes: number;
   status?: StatusCampeonato;
 }

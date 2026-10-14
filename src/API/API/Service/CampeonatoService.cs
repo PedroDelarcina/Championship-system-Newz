@@ -41,6 +41,7 @@ namespace API.Service
                 IsAtivo = c.IsAtivo,
                 Campeao = c.Campeao,
                 RegrasExtras = c.RegrasExtras,
+                MaxParticipantes = c.MaxParticipantes,
                 TotalInscricoes = c.Inscricoes.Count(),
                 Status = CalcularStatus(c.IsAtivo, c.DataInicio, c.DataFim)
             });
@@ -63,6 +64,7 @@ namespace API.Service
                 IsAtivo = campeonato.IsAtivo,
                 Campeao = campeonato.Campeao,
                 RegrasExtras = campeonato.RegrasExtras,
+                MaxParticipantes = campeonato.MaxParticipantes,
                 TotalInscricoes = campeonato.Inscricoes?.Count ?? 0,
                 Status = CalcularStatus(campeonato.IsAtivo, campeonato.DataInicio, campeonato.DataFim)
             };
@@ -83,6 +85,7 @@ namespace API.Service
                 IsAtivo = c.IsAtivo,
                 Campeao = c.Campeao,
                 RegrasExtras = c.RegrasExtras,
+                MaxParticipantes = c.MaxParticipantes,
                 TotalInscricoes = c.Inscricoes?.Count ?? 0,
                 Status = CalcularStatus(c.IsAtivo, c.DataInicio, c.DataFim)
             });
@@ -111,9 +114,9 @@ namespace API.Service
             if (requestDto.DataInicio >= requestDto.DataFim)
                 return AuthResult<bool>.FailureResult("Data de início deve ser inferior à data de fim", 400);
 
-            var conflito = await _campeonatoRepository.ExisteCampeonatosAtivosAsync(requestDto.DataInicio, requestDto.DataFim, id, cancellationToken);
+         /*   var conflito = await _campeonatoRepository.ExisteCampeonatosAtivosAsync(requestDto.DataInicio, requestDto.DataFim, id, cancellationToken);
             if (conflito)
-                return AuthResult<bool>.FailureResult("Já existe outro campeonato ativo nesse período", 400);
+                return AuthResult<bool>.FailureResult("Já existe outro campeonato ativo nesse período", 400); */
 
             campeonato.Nome = requestDto.Nome;
             campeonato.TipoCampeonato = requestDto.TipoCampeonato;
