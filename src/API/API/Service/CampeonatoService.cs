@@ -136,9 +136,9 @@ namespace API.Service
             if(requestDto.DataInicio < DateTime.UtcNow)
                 return AuthResult<int>.FailureResult("Data de início não pode ser no passado.", 400);
 
-            var conflito = await _campeonatoRepository.ExisteCampeonatosAtivosAsync(requestDto.DataInicio, requestDto.DataFim, null, cancellationToken);
+          /*  var conflito = await _campeonatoRepository.ExisteCampeonatosAtivosAsync(requestDto.DataInicio, requestDto.DataFim, null, cancellationToken);
             if(conflito)
-                return AuthResult<int>.FailureResult("Já existe um campeonato ativo no período informado.", 400);
+                return AuthResult<int>.FailureResult("Já existe um campeonato ativo no período informado.", 400); */
 
             var campeonato = new Campeonato
             {
