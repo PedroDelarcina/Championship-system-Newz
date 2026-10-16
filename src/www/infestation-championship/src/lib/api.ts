@@ -175,16 +175,19 @@ export function getApiErrorMessage(err: unknown): string {
         }
       | undefined;
     if (data?.message) return data.message;
-    if (data?.title) return data.title;
+    // Erros de validação do ASP.NET Core (ValidationProblemDetails) — contêm o
+    // detalhe específico por campo. Devem vir antes do `title`, que é genérico
+    // ("One or more validation errors occurred.").
     if (data?.errors) {
       if (Array.isArray(data.errors)) {
         const first = data.errors.find(Boolean);
         if (first) return first;
       } else {
-        const first = Object.values(data.errors)[0]?.[0];
+        const first = Object.values(data.errors).flat().find(Boolean);
         if (first) return first;
       }
     }
+    if (data?.title) return data.title;
     if (err.message === "Network Error") {
       return i18n.t("common.networkError", {
         url: import.meta.env.VITE_API_URL || defaultApiBase,
