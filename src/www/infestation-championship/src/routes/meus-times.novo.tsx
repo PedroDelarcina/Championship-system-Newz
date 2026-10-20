@@ -12,6 +12,7 @@ import { CyberButton } from "@/components/cyber-button";
 import { TeamLogo } from "@/components/team-logo";
 import { PageHeader } from "@/components/ui-blocks";
 import { getApiErrorMessage } from "@/lib/api";
+import { optimizeLogoImage } from "@/lib/image";
 import { useAuthStore } from "@/stores/auth-store";
 import { cn } from "@/lib/utils";
 
@@ -109,7 +110,10 @@ function NovoTimePage() {
     try {
       let logoUrl: string | undefined;
       if (logoFile) {
-        logoUrl = await uploadLogo.mutateAsync(logoFile);
+        // Redimensiona/recomprime antes do upload para não exceder o limite
+        // de corpo do proxy reverso em produção.
+        const optimizedLogo = await optimizeLogoImage(logoFile);
+        logoUrl = await uploadLogo.mutateAsync(optimizedLogo);
       }
 
       const time = await create.mutateAsync({
